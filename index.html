@@ -2,203 +2,83 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Bluetooth Text & Control</title>
+    <title>เชื่อมต่อ HC-05</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            text-align: center; 
-            margin-top: 40px; 
-            background-color: #f4f4f9;
-        }
-        button { 
-            padding: 12px 24px; 
-            font-size: 16px; 
-            margin: 5px; 
-            cursor: pointer; 
-            border: none;
-            border-radius: 8px;
-            color: white;
-            transition: 0.3s;
-        }
-        #connectBtn { background-color: #007bff; font-size: 18px; margin-bottom: 20px;}
-        #connectBtn:hover { background-color: #0056b3; }
-        
-        #onBtn { background-color: #28a745; }
-        #onBtn:hover { background-color: #1e7e34; }
-        #offBtn { background-color: #dc3545; }
-        #offBtn:hover { background-color: #c82333; }
-        
-        button:disabled { background-color: #ccc !important; cursor: not-allowed; }
-
-        #status { 
-            margin-top: 15px; 
-            font-size: 18px;
-            font-weight: bold; 
-            color: #555; 
-        }
-
-        .control-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            max-width: 400px;
-            margin: 20px auto;
-        }
-
-        input[type="text"] {
-            padding: 12px;
-            font-size: 16px;
-            width: 70%;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-
-        #sendTextBtn { background-color: #17a2b8; }
-        #sendTextBtn:hover { background-color: #117a8b; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding-top: 50px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        button { background: #007bff; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-size: 16px; transition: 0.3s; }
+        button:hover { background: #0056b3; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        textarea { resize: none; background: #f9f9f9; }
     </style>
 </head>
 <body>
-    <h2>ส่งข้อความ & ควบคุม ESP32</h2>
-    
-    <button id="connectBtn">ค้นหาและจับคู่อุปกรณ์</button>
-    <div id="status">สถานะ: ยังไม่ได้เชื่อมต่อ</div>
 
-    <div class="control-box">
-        <h3>ส่งข้อความ (Text)</h3>
-        <input type="text" id="textInput" placeholder="พิมพ์ข้อความภาษาอังกฤษที่นี่..." disabled>
-        <button id="sendTextBtn" disabled>ส่ง</button>
+<div class="card">
+    <h3>🌐 ควบคุม HC-05 ผ่านเว็บ</h3>
+    <button id="connectBtn">เชื่อมต่อ Bluetooth (COM Port)</button>
+    <input type="text" id="sendData" placeholder="พิมพ์ข้อความที่ต้องการส่ง...">
+    <button id="sendBtn" style="background: #28a745;">ส่งข้อมูล</button>
+    <textarea id="output" rows="5" readonly placeholder="ข้อความจะแสดงที่นี่..."></textarea>
+</div>
 
-        <hr style="margin: 20px 0; border: 0.5px solid #eee;">
+<script>
+    let port;
+    let writer;
+    let isConnected = false;
 
-        <h3>ควบคุมไฟ LED</h3>
-        <button id="onBtn" disabled>เปิดไฟ (ON)</button>
-        <button id="offBtn" disabled>ปิดไฟ (OFF)</button>
-    </div>
-
-    <script>
-        const serviceUuid = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
-        const characteristicUuid = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
-        let myDevice;
-        let myCharacteristic;
-        let isReconnecting = false;
-
-        // เปิด/ปิด การใช้งานปุ่มต่างๆ
-        function setControlsEnabled(enabled) {
-            document.getElementById('onBtn').disabled = !enabled;
-            document.getElementById('offBtn').disabled = !enabled;
-            document.getElementById('textInput').disabled = !enabled;
-            document.getElementById('sendTextBtn').disabled = !enabled;
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+        // เช็คว่าถ้าเชื่อมต่ออยู่แล้ว ไม่ต้องทำอะไรเพิ่ม
+        if (isConnected) {
+            alert("✅ พอร์ตเชื่อมต่ออยู่แล้วครับ สามารถพิมพ์ส่งข้อมูลได้เลย");
+            return;
         }
 
-        async function connectToDevice(device) {
-            try {
-                document.getElementById('status').innerText = "สถานะ: กำลังเชื่อมต่อ...";
-                document.getElementById('status').style.color = "#007bff";
-
-                const server = await device.gatt.connect();
-                const service = await server.getPrimaryService(serviceUuid);
-                myCharacteristic = await service.getCharacteristic(characteristicUuid);
-
-                isReconnecting = false;
-                document.getElementById('status').innerText = "สถานะ: เชื่อมต่อสำเร็จ!";
-                document.getElementById('status').style.color = "green";
-                setControlsEnabled(true); // เปิดให้ใช้งานปุ่มและกล่องข้อความ
-                
-            } catch (error) {
-                console.error("Connection failed", error);
-                throw error;
-            }
-        }
-
-        function onDisconnected(event) {
-            document.getElementById('status').innerText = "สถานะ: สัญญาณหลุด! กำลังพยายามเชื่อมต่อใหม่...";
-            document.getElementById('status').style.color = "#d39e00";
-            setControlsEnabled(false); // ล็อคปุ่ม
+        try {
+            // ขอสิทธิ์และเลือกพอร์ต
+            port = await navigator.serial.requestPort();
             
-            if (!isReconnecting) {
-                isReconnecting = true;
-                attemptReconnect();
+            // สั่งเปิดพอร์ตความเร็ว 9600
+            await port.open({ baudRate: 9600 }); 
+            
+            document.getElementById('output').value += "✅ เชื่อมต่อสำเร็จ!\n";
+            isConnected = true; 
+            document.getElementById('connectBtn').innerText = "เชื่อมต่อสำเร็จแล้ว";
+            document.getElementById('connectBtn').style.background = "#6c757d";
+            
+            // เตรียมตัวส่งข้อมูล
+            const textEncoder = new TextEncoderStream();
+            textEncoder.readable.pipeTo(port.writable);
+            writer = textEncoder.writable.getWriter();
+
+        } catch (error) {
+            console.error(error);
+            if (error.name === 'NetworkError') {
+                alert("❌ เปิดพอร์ตไม่ได้ครับ! กรุณาเช็คว่าปิด Serial Monitor ใน Arduino IDE หรือยัง");
+            } else {
+                alert("❌ การเชื่อมต่อล้มเหลว: " + error.message);
             }
         }
+    });
 
-        async function attemptReconnect() {
-            if (!myDevice || !isReconnecting) return;
-            try {
-                await connectToDevice(myDevice);
-            } catch (error) {
-                setTimeout(attemptReconnect, 1500); 
-            }
-        }
-
-        document.getElementById('connectBtn').addEventListener('click', async () => {
-            try {
-                myDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ name: 'ESP32_LED' }],
-                    optionalServices: [serviceUuid]
-                });
-
-                myDevice.addEventListener('gattserverdisconnected', onDisconnected);
-                await connectToDevice(myDevice);
-                
-            } catch (error) {
-                document.getElementById('status').innerText = "สถานะ: ยกเลิกการเชื่อมต่อ";
-                document.getElementById('status').style.color = "red";
-            }
-        });
-
-        window.onload = async () => {
-            if (navigator.bluetooth && navigator.bluetooth.getDevices) {
-                const devices = await navigator.bluetooth.getDevices();
-                for (const device of devices) {
-                    if (device.name === 'ESP32_LED') {
-                        document.getElementById('status').innerText = "สถานะ: พบอุปกรณ์ที่เคยเชื่อมต่อ กำลังเชื่อมต่ออัตโนมัติ...";
-                        document.getElementById('status').style.color = "#007bff";
-                        
-                        myDevice = device;
-                        myDevice.addEventListener('gattserverdisconnected', onDisconnected);
-                        isReconnecting = true; 
-                        attemptReconnect(); 
-                        break;
-                    }
-                }
-            }
-        };
-
-        // ฟังก์ชันส่งข้อมูล (รองรับทั้งข้อความและคำสั่ง)
-        async function sendCommand(textPayload) {
-            if (!myCharacteristic) return;
-            try {
-                // แปลงข้อความ String เป็น Byte array เพื่อส่งผ่าน Bluetooth
-                let encoder = new TextEncoder();
-                await myCharacteristic.writeValue(encoder.encode(textPayload));
-                console.log("ส่งข้อมูลสำเร็จ:", textPayload);
-            } catch (error) {
-                console.error("ส่งล้มเหลว", error);
-            }
-        }
-
-        // ผูก Event ให้ปุ่มต่างๆ
-        document.getElementById('onBtn').addEventListener('click', () => sendCommand('ON'));
-        document.getElementById('offBtn').addEventListener('click', () => sendCommand('OFF'));
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+        if (!writer) return alert("กรุณาเชื่อมต่อ Bluetooth ก่อนครับ!");
         
-        // ผูก Event ให้ปุ่มส่งข้อความ
-        document.getElementById('sendTextBtn').addEventListener('click', () => {
-            const textValue = document.getElementById('textInput').value;
-            if(textValue.trim() !== "") {
-                sendCommand(textValue);
-                document.getElementById('textInput').value = ""; // เคลียร์ช่องพิมพ์หลังส่งเสร็จ
-            }
-        });
+        try {
+            const text = document.getElementById('sendData').value;
+            // ส่งข้อความพร้อมรหัสจบบรรทัด \r\n เพื่อให้ Arduino อ่านค่าง่ายขึ้น
+            await writer.write(text + "\r\n"); 
+            document.getElementById('output').value += "➡️ ส่ง: " + text + "\n";
+            document.getElementById('sendData').value = ""; 
+        } catch (error) {
+            console.error(error);
+            alert("❌ ส่งข้อมูลไม่สำเร็จ การเชื่อมต่ออาจหลุดไปแล้ว");
+            isConnected = false; 
+            document.getElementById('connectBtn').innerText = "เชื่อมต่อ Bluetooth (COM Port)";
+            document.getElementById('connectBtn').style.background = "#007bff";
+        }
+    });
+</script>
 
-        // ให้กด Enter ในช่องพิมพ์ข้อความเพื่อส่งได้เลย
-        document.getElementById('textInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                document.getElementById('sendTextBtn').click();
-            }
-        });
-    </script>
 </body>
 </html>
