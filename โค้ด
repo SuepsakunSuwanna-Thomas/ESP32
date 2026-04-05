@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>HC-05 Auto Connect</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; background: #f4f7f6; }
+        .card { background: white; padding: 25px; border-radius: 8px; width: 320px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; margin-bottom: 10px; font-size: 16px; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h3 style="text-align: center; margin-top: 0;">ควบคุม HC-05</h3>
+    <p id="status" style="text-align: center; color: red; font-weight: bold;">❌ ยังไม่ได้เชื่อมต่อ</p>
+    
+    <button id="connectBtn">1. ให้สิทธิ์เชื่อมต่อ (กดครั้งแรกเท่านั้น)</button>
+    <input type="text" id="sendData" placeholder="พิมพ์ข้อความ...">
+    <button id="sendBtn" style="background: #28a745;">2. ส่งข้อมูล</button>
+    <textarea id="output" rows="5" readonly placeholder="สถานะการส่ง..."></textarea>
+</div>
+
+<script>
+    let port = null;
+
+    // ระบบบอท: วนลูปเช็คและเชื่อมต่ออัตโนมัติทุกๆ 2 วินาที
+    async function autoConnectLoop() {
+        if (port) return; // ถ้าเชื่อมต่ออยู่แล้ว ข้ามไปเลย ไม่ต้องทำอะไร
+
+        try {
+            const ports = await navigator.serial.getPorts();
+            if (ports.length === 0) return; // ถ้ายังไม่เคยให้สิทธิ์ จะรอผู้ใช้กดปุ่มก่อน
+
+            // ดึงพอร์ตที่เคยให้สิทธิ์ไว้มาเปิด
+            const selectedPort = ports[0];
+            await selectedPort.open({ baudRate: 9600 });
+            port = selectedPort;
+            
+            document.getElementById('status').innerText = "✅ เชื่อมต่ออัตโนมัติสำเร็จ";
+            document.getElementById('status').style.color = "green";
+            document.getElementById('connectBtn').style.display = "none"; // เชื่อมได้แล้ว ซ่อนปุ่มให้สิทธิ์ไปเลย
+
+            // ลูปอ่านข้อมูล (หน้าที่หลักคือดักจับตอนที่สายหลุด)
+            while (port.readable) {
+                const reader = port.readable.getReader();
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                    }
+                } catch (error) {
+                    // ถ้าเกิด error ในบรรทัดนี้ แปลว่าสัญญาณ Bluetooth หลุด!
+                    console.log("สัญญาณหลุด:", error);
+                    break; 
+                } finally {
+                    reader.releaseLock();
+                }
+            }
+        } catch (error) {
+            // ปล่อยผ่าน รอให้ลูปรอบถัดไปพยายามเปิดพอร์ตใหม่
+        } finally {
+            // ถ้ามาถึงตรงนี้แปลว่าพอร์ตหลุด ระบบจะเคลียร์สถานะเตรียมเชื่อมใหม่ให้สะอาด
+            if (port) {
+                try { await port.close(); } catch(e) {}
+                port = null;
+            }
+            document.getElementById('status').innerText = "🔄 หลุด... กำลังพยายามเชื่อมต่อใหม่";
+            document.getElementById('status').style.color = "#d39e00";
+        }
+    }
+
+    // สั่งรันบอท Auto Connect ให้ทำงานตลอดเวลา ทุกๆ 2 วินาที
+    setInterval(autoConnectLoop, 2000);
+
+    // ปุ่มขอสิทธิ์ (ผู้ใช้กดแค่ครั้งแรก เพื่อให้เว็บรู้จัก COM Port)
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+        if (port) return; 
+        try {
+            await navigator.serial.requestPort(); 
+            document.getElementById('status').innerText = "⏳ ได้รับสิทธิ์แล้ว รอระบบเชื่อมต่อ...";
+            // พอให้สิทธิ์เสร็จ เดี๋ยว setInterval จะทำงานและเปิดพอร์ตให้เอง
+        } catch (error) {
+            console.log("ผู้ใช้ยกเลิกการเลือก");
+        }
+    });
+
+    // ปุ่มส่งข้อมูล (ปลอดภัย ไม่ทำให้พอร์ตค้าง)
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+        if (!port || !port.writable) {
+            document.getElementById('output').value = "⚠️ รอระบบเชื่อมต่อให้เสร็จก่อนครับ!\n";
+            return;
+        }
+        
+        const text = document.getElementById('sendData').value + "\r\n";
+        const encoder = new TextEncoder();
+        const writer = port.writable.getWriter();
+        
+        try {
+            await writer.write(encoder.encode(text));
+            document.getElementById('output').value = "➡️ ส่ง: " + text;
+            document.getElementById('sendData').value = ""; // เคลียร์ช่องพิมพ์
+        } catch (error) {
+            document.getElementById('output').value = "❌ ส่งไม่สำเร็จ สัญญาณอาจกำลังเชื่อมต่อใหม่\n";
+        } finally {
+            writer.releaseLock(); // คืนสิทธิ์การเขียนทันที ป้องกันพอร์ตค้าง
+        }
+    });
+</script>
+
+</body>
+</html>
