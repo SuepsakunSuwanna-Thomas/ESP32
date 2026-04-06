@@ -10,12 +10,10 @@
     <style>
         /* ================= PREMIUM MODERN VARIABLES ================= */
         :root {
-            /* โทนสี Midnight Zinc (เรียบหรู สบายตา) */
             --bg-base: #09090b;
             --bg-surface: #18181b;
             --bg-elevated: #27272a;
             
-            /* สีสัน (Accent) */
             --primary: #3b82f6; 
             --primary-hover: #2563eb;
             --primary-light: rgba(59, 130, 246, 0.1);
@@ -24,18 +22,15 @@
             --danger-hover: #dc2626;
             --success: #10b981;
 
-            /* ข้อความ */
             --text-main: #fafafa;
             --text-muted: #a1a1aa;
             
-            /* โครงสร้าง */
             --border: #27272a;
             --border-hover: #3f3f46;
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
             
-            /* เงา */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         }
@@ -63,8 +58,16 @@
             box-shadow: var(--shadow-sm);
         }
 
+        .topbar-main { display: flex; align-items: center; justify-content: space-between; }
         .brand { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px;}
         .brand-icon { width: 22px; height: 22px; color: var(--primary); }
+
+        .menu-toggle {
+            display: none; /* ซ่อนบน PC */
+            background: var(--bg-elevated); border: 1px solid var(--border);
+            color: var(--text-main); padding: 8px; border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
 
         .controls { display: flex; align-items: center; gap: 12px; }
 
@@ -78,7 +81,7 @@
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: 0.3s; }
 
         /* ================= LAYOUT ================= */
-        .main-grid { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+        .main-grid { display: flex; flex: 1; gap: 16px; overflow: hidden; position: relative; }
 
         /* ================= MENU (LINEAR STYLE) ================= */
         .sidebar {
@@ -87,6 +90,7 @@
             border-radius: var(--radius-lg); padding: 16px;
             display: flex; flex-direction: column; gap: 6px;
             border: 1px solid var(--border); overflow-y: auto;
+            transition: all 0.3s ease;
         }
 
         .nav-item {
@@ -185,9 +189,11 @@
         .btn-outline:hover { background: var(--border); border-color: var(--border-hover); }
         
         /* ป้องกันจอเลื่อนเมื่อกดปุ่มค้าง */
-        #pidHoldBtn, #angleWalkBtn {
-            touch-action: none;
-        }
+        #pidHoldBtn, #angleWalkBtn { touch-action: none; }
+        
+        /* กลุ่มปุ่มด้านล่างของ Panel */
+        .panel-actions { display: flex; gap: 12px; margin-top: 10px; }
+        .panel-actions button { flex: 1; }
 
         /* ================= MINIMAL JOYSTICK ================= */
         #joyPanel { display: none; flex-direction: column; height: 100%; max-width: 100%; }
@@ -198,7 +204,6 @@
             width: 240px; height: 240px; border-radius: 50%;
             background: var(--bg-base); border: 2px solid var(--border);
             position: relative; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
-            /* ล็อกการเลื่อนหน้าจอบนพื้นที่จอยสติ๊ก ป้องกันบัค Intervention */
             touch-action: none; 
         }
         #zone_joystick::after {
@@ -206,43 +211,49 @@
             background: var(--border); border-radius: 50%; transform: translate(-50%, -50%); opacity: 0.3;
         }
 
-        /* ================= MOBILE LAYOUT (APP-LIKE BOTTOM NAV) ================= */
+        /* ================= MOBILE LAYOUT ================= */
         @media (max-width: 768px) {
-            body { padding: 8px; }
-            .topbar { flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 10px; }
-            .brand { width: 100%; justify-content: center; margin-bottom: 4px; font-size: 18px; }
-            .controls { width: 100%; justify-content: space-between; }
-            button { padding: 10px 14px; font-size: 13px; }
+            body { padding: 12px; }
+            .topbar { flex-direction: column; align-items: stretch; padding: 12px; gap: 12px; }
             
-            /* เปลี่ยน Flex-direction ให้เนื้อหาอยู่บน เมนูอยู่ล่าง */
-            .main-grid { flex-direction: column; gap: 8px; }
+            .topbar-main { width: 100%; }
+            .menu-toggle { display: flex; align-items: center; justify-content: center; }
             
-            /* พื้นที่เนื้อหาโดนดันไปอยู่ลำดับแรก */
-            .content-area { 
-                order: 1; 
-                padding: 20px 16px; 
-            }
+            /* จัดเรียงปุ่มควบคุมให้ไม่ล้นจอ */
+            .controls { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 8px; }
+            .status-container { grid-column: span 2; justify-content: center; margin-bottom: 4px; }
+            #connectBtn { grid-column: span 2; }
+            .controls button { padding: 10px 12px; font-size: 13px; width: 100%; }
 
-            /* แถบเมนูมือถือถูกย้ายลงมาด้านล่างสุด */
+            .main-grid { flex-direction: column; gap: 10px; }
+            
+            /* ปรับเมนูเป็นแบบ Dropdown ซ้อนทับเนื้อหา */
             .sidebar { 
-                order: 2;
-                width: 100%; min-width: unset; flex-direction: row; 
-                padding: 8px; border-radius: var(--radius-lg);
-                overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
-                flex-shrink: 0; /* ป้องกันแถบเมนูโดนบีบ */
+                position: absolute; top: 0; left: 0; right: 0;
+                z-index: 100;
+                background: rgba(24, 24, 27, 0.95); backdrop-filter: blur(10px);
+                border: 1px solid var(--border-hover);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+                display: none; /* ซ่อนเป็นค่าเริ่มต้น */
+                padding: 16px;
+                transform-origin: top;
+                animation: dropDown 0.2s ease forwards;
             }
-            .nav-item { 
-                flex: 0 0 auto; width: auto; padding: 10px 16px; 
-                margin-right: 8px; border-radius: 30px; 
-                background: var(--bg-elevated); border: 1px solid transparent; 
-                scroll-snap-align: start; white-space: nowrap; gap: 8px;
-                font-size: 13px;
-            }
-            .nav-item.active { background: var(--text-main); color: var(--bg-base); }
-            .nav-item.active .nav-icon { color: var(--bg-base); }
+            .sidebar.show-menu { display: flex; }
+            @keyframes dropDown { from { opacity: 0; transform: scaleY(0.9); } to { opacity: 1; transform: scaleY(1); } }
+            
+            .nav-item { padding: 14px 16px; border: 1px solid transparent; }
 
+            .content-area { padding: 20px 16px; }
             .grid-2 { grid-template-columns: 1fr; gap: 0; }
             
+            /* ป้องกันปุ่มใน Panel ล้นจอ */
+            .panel-actions { flex-direction: column; gap: 10px; }
+            .panel-actions button { width: 100%; }
+            
+            /* ปรับขนาดจอยให้พอดีจอมือถือ */
+            .slider-group { gap: 10px; }
+            .slider-group input[type="number"] { width: 60px; font-size: 16px; }
             #zone_joystick { width: 220px; height: 220px; }
             .joystick-wrapper { min-height: 240px; }
         }
@@ -254,9 +265,15 @@
 <body>
 
 <div class="topbar">
-    <div class="brand">
-        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-        RP2350 Control
+    <div class="topbar-main">
+        <div class="brand">
+            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            RP2350 Control
+        </div>
+        <!-- ปุ่มเปิด/ปิด เมนูบนมือถือ -->
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
     </div>
     <div class="controls">
         <div id="status-container" class="status-container">
@@ -268,7 +285,7 @@
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             Start
         </button>
-        <button class="btn-outline" style="color: var(--danger);" onclick="sendCmd('CMD,RST')">
+        <button class="btn-outline" style="color: var(--danger); border-color: var(--border-hover);" onclick="sendCmd('CMD,RST')">
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
             Reset
         </button>
@@ -276,6 +293,7 @@
 </div>
 
 <div class="main-grid">
+    <!-- แถบเมนูซ้ายมือ (บนมือถือจะซ่อนเป็น Dropdown) -->
     <div class="sidebar">
         <button class="nav-item active" onclick="switchPanel('calPanel', this)">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line></svg>
@@ -322,9 +340,9 @@
             </div>
             <div class="form-group"><label>พอร์ตเซ็นเซอร์ตรวจจับแยก</label><input type="number" id="pid_sensor" value="3"></div>
             
-            <div style="display: flex; gap: 12px; margin-top: 10px;">
-                <button class="btn-primary" style="flex: 1;" onclick="sendPIDPass()">วิ่งผ่านแยกตามตั้งค่า</button>
-                <button id="pidHoldBtn" class="btn-outline" style="flex: 1;">กดค้างเพื่อเช็คเส้น</button>
+            <div class="panel-actions">
+                <button class="btn-primary" onclick="sendPIDPass()">วิ่งผ่านแยกตามตั้งค่า</button>
+                <button id="pidHoldBtn" class="btn-outline">กดค้างเพื่อเช็คเส้น</button>
             </div>
         </div>
 
@@ -375,7 +393,7 @@
                 <label>ระบุองศาเป้าหมาย (+ ขวา, - ซ้าย)</label>
                 <input type="number" id="angle_target" value="90" style="text-align: center; font-size: 24px; font-weight: 600;">
             </div>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="panel-actions">
                 <button class="btn-primary" onclick="sendCmd(`CMD,ANGT,${document.getElementById('angle_target').value}`)">หันหน้าตามองศา</button>
                 <button id="angleWalkBtn" class="btn-outline">กดค้างเพื่อเดินรักษาทิศทาง</button>
             </div>
@@ -384,6 +402,12 @@
 </div>
 
 <script>
+    // ================= MOBILE MENU TOGGLE =================
+    function toggleMenu() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('show-menu');
+    }
+
     // ================= SYNC INPUTS =================
     function bindInputs(rangeId, numId) {
         const range = document.getElementById(rangeId);
@@ -405,6 +429,11 @@
         document.getElementById(panelId).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+
+        // เมื่อใช้งานจอบนมือถือ ให้พับเมนูเก็บเมื่อเลือกเมนูเสร็จ
+        if (window.innerWidth <= 768) {
+            document.querySelector('.sidebar').classList.remove('show-menu');
+        }
 
         if (panelId === 'joyPanel') setTimeout(initJoystick, 100);
         else destroyJoystick();
@@ -498,15 +527,14 @@
         sendCmd(`CMD,SRV,${document.getElementById('srv_num').value},${document.getElementById('srv_angle_num').value}`);
     }
 
-    // ปรับปรุงระบบปุ่ม Hold เพื่อลดบัค [Intervention] และการรันอีเวนต์ซ้อน
     function setupHold(btnId, getCmd, stopCmd) {
         const btn = document.getElementById(btnId);
         let interval = null;
         let isHolding = false;
 
         const start = (e) => { 
-            if (e && e.cancelable) e.preventDefault(); // แก้บัค Intervention
-            if (isHolding) return; // กันการกดซ้ำซ้อนจากทัช
+            if (e && e.cancelable) e.preventDefault();
+            if (isHolding) return;
             isHolding = true;
             let cmd = typeof getCmd === 'function' ? getCmd() : getCmd;
             sendCmd(cmd); 
@@ -550,11 +578,11 @@
         joy.on('end', () => { 
             yVal = 0; xVal = 0; 
             isJoyMoving = false;
-            sendCmd("CMD,STOP"); // ลดการส่งข้อมูลไปบลูทูธให้ส่งหยุดแค่ 1 ครั้ง
+            sendCmd("CMD,STOP");
         });
 
         joyInterval = setInterval(() => {
-            if(!isJoyMoving) return; // ไม่ทำงานหากจอยอยู่นิ่ง ๆ (ลดภาระ Bluetooth)
+            if(!isJoyMoving) return; 
 
             let maxSpd = parseInt(document.getElementById('joy_speed_num').value);
             
