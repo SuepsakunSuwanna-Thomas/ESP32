@@ -45,7 +45,8 @@
             color: var(--text-main);
             margin: 0; padding: 16px;
             display: flex; flex-direction: column;
-            height: 100vh; overflow: hidden;
+            height: 100dvh; /* ใช้ dvh เพื่อแก้บัคขอบจอมือถือ */
+            overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -58,9 +59,19 @@
             box-shadow: var(--shadow-sm);
         }
 
-        .topbar-main { display: flex; align-items: center; justify-content: space-between; }
+        .topbar-main { display: flex; align-items: center; justify-content: space-between; gap: 15px;}
         .brand { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px;}
         .brand-icon { width: 22px; height: 22px; color: var(--primary); }
+
+        .topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+        .btn-icon {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-main); padding: 8px; border-radius: var(--radius-sm);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-icon:hover { background: var(--bg-elevated); border-color: var(--border-hover); }
 
         .menu-toggle {
             display: none; /* ซ่อนบน PC */
@@ -227,24 +238,27 @@
 
             .main-grid { flex-direction: column; gap: 10px; }
             
-            /* ปรับเมนูเป็นแบบ Dropdown ซ้อนทับเนื้อหา */
+            /* ปรับเมนูเป็นแบบ Dropdown เรียงลงมา (แก้บัคการทับกัน) */
             .sidebar { 
                 position: absolute; top: 0; left: 0; right: 0;
                 z-index: 100;
-                background: rgba(24, 24, 27, 0.95); backdrop-filter: blur(10px);
+                background: rgba(24, 24, 27, 0.98); backdrop-filter: blur(10px);
                 border: 1px solid var(--border-hover);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-                display: none; /* ซ่อนเป็นค่าเริ่มต้น */
+                box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+                display: none; 
+                flex-direction: column; /* บังคับให้เป็นแนวตั้ง */
+                align-items: stretch;
                 padding: 16px;
                 transform-origin: top;
                 animation: dropDown 0.2s ease forwards;
+                max-height: calc(100vh - 150px);
             }
             .sidebar.show-menu { display: flex; }
             @keyframes dropDown { from { opacity: 0; transform: scaleY(0.9); } to { opacity: 1; transform: scaleY(1); } }
             
-            .nav-item { padding: 14px 16px; border: 1px solid transparent; }
+            .nav-item { padding: 14px 16px; border: 1px solid transparent; width: 100%; justify-content: flex-start; }
 
-            .content-area { padding: 20px 16px; }
+            .content-area { padding: 20px 16px 80px 16px; } /* เพิ่ม Padding ล่างกันปุ่มล้นจอ */
             .grid-2 { grid-template-columns: 1fr; gap: 0; }
             
             /* ป้องกันปุ่มใน Panel ล้นจอ */
@@ -270,10 +284,17 @@
             <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
             RP2350 Control
         </div>
-        <!-- ปุ่มเปิด/ปิด เมนูบนมือถือ -->
-        <button class="menu-toggle" onclick="toggleMenu()">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
+        
+        <div class="topbar-actions">
+            <!-- ปุ่มเต็มจอ -->
+            <button class="btn-icon" onclick="toggleFullScreen()" title="เต็มหน้าจอ">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+            </button>
+            <!-- ปุ่มเปิด/ปิด เมนูบนมือถือ -->
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
     </div>
     <div class="controls">
         <div id="status-container" class="status-container">
@@ -352,12 +373,12 @@
             <div class="form-group">
                 <label>เลือกพอร์ตมอเตอร์</label>
                 <select id="srv_num" class="custom-select">
-                    <option value="1">PORT 1 (กลไกหลัก)</option>
-                    <option value="2">PORT 2 (กลไกหนีบ)</option>
-                    <option value="3">PORT 3 (พอร์ตเสริม)</option>
-                    <option value="4">PORT 4 (พอร์ตเสริม)</option>
-                    <option value="5">PORT 5 (พอร์ตเสริม)</option>
-                    <option value="6">PORT 6 (พอร์ตเสริม)</option>
+                    <option value="1">Servo 1 (กลไกหลัก)</option>
+                    <option value="2">Servo 2 (กลไกหนีบ)</option>
+                    <option value="3">Servo 3 (พอร์ตเสริม)</option>
+                    <option value="4">Servo 4 (พอร์ตเสริม)</option>
+                    <option value="5">Servo 5 (พอร์ตเสริม)</option>
+                    <option value="6">Servo 6 (พอร์ตเสริม)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -402,11 +423,71 @@
 </div>
 
 <script>
+    // ================= FULLSCREEN TOGGLE =================
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+                document.documentElement.msRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+        }
+    }
+
     // ================= MOBILE MENU TOGGLE =================
     function toggleMenu() {
         const sidebar = document.querySelector('.sidebar');
         sidebar.classList.toggle('show-menu');
     }
+
+    // ================= AUTO-SAVE (LOCAL STORAGE) =================
+    const savedInputs = [
+        'pid_speed', 'pid_count', 'pid_kp', 'pid_kd', 'pid_sensor', 
+        'srv_num', 'srv_angle_range', 'srv_angle_num', 
+        'joy_speed_range', 'joy_speed_num', 'angle_target'
+    ];
+
+    function saveSettings() {
+        savedInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) localStorage.setItem('rp2350_' + id, el.value);
+        });
+    }
+
+    function loadSettings() {
+        savedInputs.forEach(id => {
+            const val = localStorage.getItem('rp2350_' + id);
+            const el = document.getElementById(id);
+            if(val !== null && el) {
+                el.value = val;
+                // กระตุ้นให้ input เลื่อนสไลด์ซิงก์กันตอนโหลดเสร็จ
+                el.dispatchEvent(new Event('input')); 
+            }
+        });
+    }
+
+    // โหลดค่าที่เคยบันทึกไว้เมื่อเปิดเว็บ
+    window.addEventListener('DOMContentLoaded', () => {
+        loadSettings();
+        // ผูก Event ให้บันทึกอัตโนมัติเมื่อมีการเปลี่ยนแปลงค่าใดๆ
+        savedInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.addEventListener('input', saveSettings);
+                el.addEventListener('change', saveSettings);
+            }
+        });
+    });
 
     // ================= SYNC INPUTS =================
     function bindInputs(rangeId, numId) {
