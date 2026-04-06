@@ -41,10 +41,12 @@
             font-family: 'Prompt', -apple-system, sans-serif;
             background-color: var(--bg-base);
             color: var(--text-main);
-            margin: 0; padding: 16px;
+            margin: 0; 
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             display: flex; flex-direction: column;
             height: 100dvh; overflow: hidden;
             -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none; /* ป้องกันการดึงหน้าจอในมือถือ */
         }
 
         /* ================= TOP NAVIGATION ================= */
@@ -52,7 +54,7 @@
             display: flex; justify-content: space-between; align-items: center;
             background: var(--bg-surface);
             backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            padding: 14px 24px; border-radius: var(--radius-lg); margin-bottom: 16px;
+            padding: 14px 24px; border-radius: var(--radius-lg); margin: 16px;
             border: 1px solid var(--border); flex-shrink: 0;
             box-shadow: var(--shadow-lg); z-index: 50; gap: 15px;
             flex-wrap: wrap; 
@@ -65,7 +67,7 @@
         .topbar-actions { display: flex; align-items: center; gap: 12px; }
 
         .status-container {
-            display: flex; align-items: center; gap: 10px;
+            display: flex; align-items: center; gap: 10px; justify-content: center;
             padding: 8px 18px; border-radius: var(--radius-full);
             background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
             font-size: 14px; font-weight: 500; white-space: nowrap;
@@ -116,7 +118,7 @@
         }
 
         /* ================= MAIN LAYOUT ================= */
-        .main-grid { display: flex; flex: 1; gap: 16px; overflow: hidden; position: relative; }
+        .main-grid { display: flex; flex: 1; gap: 16px; overflow: hidden; position: relative; padding: 0 16px 16px 16px; }
 
         .sidebar {
             width: 260px; min-width: 260px;
@@ -159,13 +161,14 @@
 
         /* ================= INPUTS & FORMS ================= */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .form-group { margin-bottom: 24px; }
+        .form-group { margin-bottom: 24px; width: 100%; }
         label { display: block; margin-bottom: 10px; color: var(--ios-gray); font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
         
+        /* Font size 16px is minimum on iOS to prevent auto-zoom */
         input[type="number"], .custom-select {
             width: 100%; padding: 14px 20px; background: var(--bg-elevated);
             border: 1px solid var(--border); border-radius: var(--radius-md);
-            color: var(--text-main); font-family: inherit; font-size: 17px; font-weight: 500;
+            color: var(--text-main); font-family: inherit; font-size: 16px; font-weight: 500;
             transition: var(--transition); outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
         }
         input[type="number"]:focus, .custom-select:focus { border-color: var(--ios-blue); background: var(--bg-base); }
@@ -177,8 +180,8 @@
         }
 
         /* Slider Component */
-        .slider-group { display: flex; align-items: center; gap: 20px; background: var(--bg-base); padding: 12px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); }
-        input[type="range"] { flex: 1; -webkit-appearance: none; height: 8px; background: rgba(255,255,255,0.15); border-radius: 10px; outline: none; }
+        .slider-group { display: flex; align-items: center; gap: 15px; background: var(--bg-base); padding: 10px 15px; border-radius: var(--radius-md); border: 1px solid var(--border); }
+        input[type="range"] { flex: 1; -webkit-appearance: none; height: 8px; background: rgba(255,255,255,0.15); border-radius: 10px; outline: none; width: 100%; }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
             background: #fff; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.5);
@@ -186,8 +189,8 @@
         }
 
         .slider-group input[type="number"] { 
-            width: 85px; text-align: center; font-weight: 700; color: var(--ios-blue); 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px; font-size: 18px; padding: 6px;
+            width: 70px; text-align: center; font-weight: 700; color: var(--ios-blue); 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px; font-size: 16px; padding: 8px 4px;
         }
 
         .panel-actions { display: flex; gap: 15px; margin-top: 20px; }
@@ -196,54 +199,109 @@
 
         /* ================= JOYSTICK & FULLSCREEN ================= */
         .joy-container-view { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 20px; }
-        .joystick-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 280px; width: 100%; }
+        .joystick-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 280px; width: 100%; touch-action: none;}
         #zone_joystick { width: 260px; height: 260px; border-radius: 50%; background: var(--bg-base); border: 2px solid var(--border); position: relative; box-shadow: inset 0 4px 15px rgba(0,0,0,0.6); touch-action: none; }
 
         /* Fullscreen View Setup */
         body.fs-joy-mode .topbar, body.fs-joy-mode .sidebar, body.fs-joy-mode .panel-header, body.fs-joy-mode .form-group:not(.fs-keep) { display: none !important; }
+        body.fs-joy-mode .main-grid { padding: 0; }
         body.fs-joy-mode .content-area { 
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-            border-radius: 0; border: none; padding: 20px; z-index: 9999; 
+            border-radius: 0; border: none; padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px; z-index: 9999; 
             background: var(--bg-base); display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
-        body.fs-joy-mode #joyPanel { height: 100%; width: 100%; }
-        body.fs-joy-mode .joy-container-view { height: 100%; justify-content: center; gap: 40px; }
-        body.fs-joy-mode .form-group.fs-keep { width: 100%; max-width: 500px; margin-bottom: 0; background: var(--bg-surface); padding: 15px; border-radius: var(--radius-lg); }
-        body.fs-joy-mode #zone_joystick { width: 340px; height: 340px; border-color: rgba(255,255,255,0.2); }
+        body.fs-joy-mode #joyPanel { height: 100%; width: 100%; display: flex; flex-direction: column;}
+        body.fs-joy-mode .joy-container-view { height: 100%; justify-content: space-evenly; gap: 20px; }
+        body.fs-joy-mode .form-group.fs-keep { width: 100%; max-width: 500px; margin-bottom: 0; background: var(--bg-surface); padding: 15px; border-radius: var(--radius-lg); margin-top: 50px;}
+        body.fs-joy-mode #zone_joystick { width: min(340px, 80vw); height: min(340px, 80vw); border-color: rgba(255,255,255,0.2); }
 
         /* Exit Button for Fullscreen - REDESIGNED FOR HIGH VISIBILITY */
         .fs-close-btn { 
-            position: absolute; top: 40px; right: 40px; z-index: 10001; 
-            background: var(--ios-red); color: #fff; border-radius: 50%; width: 60px; height: 60px; 
+            position: absolute; top: max(20px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); z-index: 10001; 
+            background: var(--ios-red); color: #fff; border-radius: 50%; width: 50px; height: 50px; 
             display: none; justify-content: center; align-items: center; 
-            border: 3px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 20px rgba(255, 69, 58, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 20px rgba(255, 69, 58, 0.5);
             cursor: pointer; transition: var(--transition);
         }
-        .fs-close-btn:hover { background: #ff5b52; transform: scale(1.1); }
+        .fs-close-btn:active { background: #ff5b52; transform: scale(0.9); }
         body.fs-joy-mode .fs-close-btn { display: flex; }
 
         /* ================= MOBILE LAYOUT ================= */
         @media (max-width: 768px) {
-            body { padding: 0; }
-            .topbar { flex-direction: column; align-items: stretch; padding: 16px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); gap: 15px; margin-bottom: 0; border-top: none; }
-            .topbar-main { width: 100%; justify-content: space-between; }
-            .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-            .status-container { grid-column: span 2; justify-content: center; border: none; background: transparent; font-size: 13px; }
-            #connectBtn { grid-column: span 2; padding: 14px; }
-            .controls button { padding: 14px; width: 100%; border-radius: var(--radius-md); font-size: 14px;}
+            .topbar { 
+                flex-direction: column; 
+                align-items: stretch; 
+                padding: max(16px, env(safe-area-inset-top)) 16px 16px; 
+                border-radius: 0 0 var(--radius-lg) var(--radius-lg); 
+                gap: 12px; 
+                margin: 0; 
+                border-top: none; 
+                border-left: none;
+                border-right: none;
+            }
+            .topbar-main { justify-content: space-between; }
+            .brand { font-size: 18px; }
             
-            .content-area { padding: 30px 20px 120px 20px; border-radius: 0; border: none; background: transparent; flex: 1; }
+            /* Reorganize buttons on mobile */
+            .controls { 
+                display: grid; 
+                grid-template-columns: 1fr 1fr; /* 2 columns for start/reset */
+                gap: 10px; 
+                width: 100%; 
+            }
+            .status-container { 
+                grid-column: span 2; /* Full width */
+                border: none; background: rgba(255, 255, 255, 0.03); font-size: 13px; 
+                padding: 6px 12px;
+            }
+            #connectBtn { 
+                grid-column: span 2; /* Full width */
+                padding: 14px; 
+            }
+            .controls button { padding: 12px; width: 100%; border-radius: var(--radius-md); font-size: 14px;}
+            
+            .main-grid { padding: 0; flex-direction: column; }
+            
+            /* Add bottom padding to account for the tab bar and iOS home indicator */
+            .content-area { 
+                padding: 20px 16px calc(90px + env(safe-area-inset-bottom)) 16px; 
+                border-radius: 0; border: none; background: transparent; box-shadow: none;
+            }
+            
+            .panel-header { flex-direction: column; align-items: flex-start; gap: 15px; margin-bottom: 20px; padding-bottom: 15px;}
+            .panel-header button { align-self: flex-end; margin-top: -45px; } /* ขยับปุ่ม Fullscreen ไปมุมขวาบน */
+            
             .grid-2 { grid-template-columns: 1fr; gap: 0; }
             .form-group { margin-bottom: 16px; }
             .panel-actions { flex-direction: column; gap: 12px; }
             
-            /* Bottom Tab Bar */
-            .sidebar { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; min-width: unset; height: 85px; flex-direction: row; justify-content: space-around; align-items: center; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: none; border-top: 1px solid var(--border); padding: 8px 5px 25px 5px; margin: 0; background: rgba(28, 28, 30, 0.9); box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
-            .nav-item { flex-direction: column; gap: 5px; padding: 5px; height: 100%; justify-content: center; text-align: center; font-size: 11px; }
+            /* Bottom Tab Bar (iOS Style) */
+            .sidebar { 
+                position: fixed; 
+                bottom: 0; left: 0; right: 0; 
+                width: 100%; min-width: unset; height: auto; 
+                flex-direction: row; justify-content: space-around; align-items: flex-start; 
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0; 
+                border: none; border-top: 1px solid var(--border); 
+                padding: 10px 5px max(15px, env(safe-area-inset-bottom)) 5px; 
+                margin: 0; background: rgba(28, 28, 30, 0.95); 
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.5); 
+            }
+            .nav-item { 
+                flex-direction: column; gap: 4px; padding: 6px 2px; height: auto; 
+                justify-content: center; text-align: center; font-size: 11px; flex: 1;
+                border-radius: 8px;
+            }
             .nav-icon { width: 24px; height: 24px; margin: 0; }
             .nav-item.active { background: transparent; color: var(--ios-blue); font-weight: 700; }
-            
-            body.fs-joy-mode .fs-close-btn { top: 20px; right: 20px; width: 54px; height: 54px;}
+        }
+
+        /* สำหรับมือถือจอเล็กมาก (เช่น iPhone SE) */
+        @media (max-width: 375px) {
+            .nav-text { font-size: 10px; letter-spacing: -0.5px;}
+            .slider-group input[type="number"] { width: 55px; font-size: 14px; }
+            .slider-group { padding: 8px 10px; }
+            button { font-size: 13px; padding: 10px 16px; }
         }
 
         .icon-sm { width: 20px; height: 20px; }
@@ -274,7 +332,7 @@
         </div>
         <button id="connectBtn" onclick="requestBT()">เชื่อมต่อบลูทูธ</button>
         <button class="btn-primary" onclick="sendCmd('CMD,START')">เริ่มทำงาน</button>
-        <button class="btn-danger" onclick="sendCmd('CMD,RST')">รีเซ็ตบอร์ด</button>
+        <button class="btn-danger" onclick="sendCmd('CMD,RST')">รีเซ็ต</button>
     </div>
 </div>
 
@@ -309,19 +367,19 @@
         </button>
 
         <div id="calPanel" class="panel active">
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 350px; text-align: center;">
-                <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--ios-blue-light); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 0 40px rgba(10, 132, 255, 0.2);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="1.5" style="width: 50px; height: 50px;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; text-align: center;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--ios-blue-light); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 0 40px rgba(10, 132, 255, 0.2);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="1.5" style="width: 40px; height: 40px;">
                         <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle>
                         <line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line>
                         <line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line>
                     </svg>
                 </div>
-                <h3 style="border: none; margin-bottom: 12px; font-size: 26px; justify-content: center;">ตั้งค่าแสงอัตโนมัติ</h3>
-                <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 16px; line-height: 1.6; max-width: 450px;">
+                <h3 style="border: none; margin-bottom: 10px; font-size: 22px; justify-content: center;">ตั้งค่าแสงอัตโนมัติ</h3>
+                <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px; line-height: 1.5; max-width: 450px;">
                     วางหุ่นยนต์ให้เซ็นเซอร์อยู่กึ่งกลางเส้นขาว-ดำ<br>ระบบจะกวาดเพื่อเก็บค่าความเข้มแสงที่ดีที่สุด
                 </p>
-                <button class="btn-primary" style="padding: 18px 50px; font-size: 17px; border-radius: var(--radius-full); width: 100%; max-width: 350px;" onclick="sendCmd('CMD,CAL')">เริ่มสแกนค่าแสง</button>
+                <button class="btn-primary" style="padding: 16px 40px; font-size: 16px; border-radius: var(--radius-full); width: 100%; max-width: 300px;" onclick="sendCmd('CMD,CAL')">เริ่มสแกนค่าแสง</button>
             </div>
         </div>
 
@@ -542,15 +600,55 @@
     setupHold('angleWalkBtn', () => `CMD,ANGW,${document.getElementById('angle_target').value}`, 'CMD,STOP');
 
     let joy, joyInt, yV = 0, xV = 0, moving = false;
+    
+    // ปรับปรุงฟังก์ชันวาดจอยสติ๊กให้เหมาะกับจอมือถือมากขึ้น
     function initJoystick() {
         if(joy) return;
-        let size = isJoyFullscreen ? (window.innerWidth > 500 ? 320 : 250) : 180;
-        joy = nipplejs.create({ zone: document.getElementById('zone_joystick'), mode: 'static', position: { left: '50%', top: '50%' }, color: '#0A84FF', size: size });
+        
+        // คำนวณขนาดจอยให้เหมาะสมตามหน้าจอ
+        let screenW = window.innerWidth;
+        let size;
+        if (isJoyFullscreen) {
+            size = screenW > 500 ? 320 : (screenW * 0.7); // 70% ของความกว้างจอเมื่อเต็มจอในมือถือ
+        } else {
+            size = screenW > 500 ? 200 : 180;
+        }
+
+        const zone = document.getElementById('zone_joystick');
+        zone.style.width = size + 'px';
+        zone.style.height = size + 'px';
+
+        joy = nipplejs.create({ 
+            zone: zone, 
+            mode: 'static', 
+            position: { left: '50%', top: '50%' }, 
+            color: '#0A84FF', 
+            size: size 
+        });
+        
         joy.on('move', (e, d) => { moving = true; yV = Math.sin(d.angle.radian) * d.distance; xV = Math.cos(d.angle.radian) * d.distance; });
         joy.on('end', () => { yV = 0; xV = 0; moving = false; sendCmd("CMD,STOP"); });
-        joyInt = setInterval(() => { if(!moving) return; let spd = parseInt(document.getElementById('joy_speed_num').value); let hz = size / 2; let nY = yV / hz; let nX = xV / hz; let mL = (nY + nX) * spd; let mR = (nY - nX) * spd; sendCmd(`CMD,JOY,${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))},${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))}`); }, 100);
+        
+        joyInt = setInterval(() => { 
+            if(!moving) return; 
+            let spd = parseInt(document.getElementById('joy_speed_num').value); 
+            let hz = size / 2; 
+            let nY = yV / hz; 
+            let nX = xV / hz; 
+            let mL = (nY + nX) * spd; 
+            let mR = (nY - nX) * spd; 
+            sendCmd(`CMD,JOY,${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))},${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))}`); 
+        }, 100);
     }
     function destroyJoystick() { if(joy) { joy.destroy(); joy = null; } clearInterval(joyInt); }
+    
+    // รีเซ็ตจอยเมื่อหมุนจอ
+    window.addEventListener('resize', () => {
+        if (document.getElementById('joyPanel').classList.contains('active')) {
+            destroyJoystick();
+            setTimeout(initJoystick, 150);
+        }
+    });
 </script>
 </body>
 </html>
