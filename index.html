@@ -2,51 +2,48 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RP2350 Command Center</title>
     <!-- โหลดฟอนต์ Prompt -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
     <style>
-        /* ================= PREMIUM MODERN VARIABLES ================= */
+        /* ================= iOS PREMIUM THEME VARIABLES ================= */
         :root {
-            --bg-base: #09090b;
-            --bg-surface: #18181b;
-            --bg-elevated: #27272a;
+            --bg-base: #000000;
+            --bg-surface: rgba(28, 28, 30, 0.85);
+            --bg-elevated: rgba(44, 44, 46, 0.95);
             
-            --primary: #3b82f6; 
-            --primary-hover: #2563eb;
-            --primary-light: rgba(59, 130, 246, 0.1);
+            --ios-blue: #0A84FF;
+            --ios-blue-light: rgba(10, 132, 255, 0.2);
+            --ios-red: #FF453A;
+            --ios-red-light: rgba(255, 69, 58, 0.15);
+            --ios-green: #30D158;
+            --ios-gray: #8E8E93;
             
-            --danger: #ef4444; 
-            --danger-hover: #dc2626;
-            --success: #10b981;
-
-            --text-main: #fafafa;
-            --text-muted: #a1a1aa;
+            --text-main: #FFFFFF;
+            --text-muted: #A2A2A7;
             
-            --border: #27272a;
-            --border-hover: #3f3f46;
-            --radius-sm: 8px;
+            --border: rgba(255, 255, 255, 0.15);
             --radius-md: 12px;
-            --radius-lg: 16px;
+            --radius-lg: 18px;
+            --radius-full: 9999px;
             
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* ================= GLOBAL STYLES ================= */
+        /* ================= RESET & GLOBAL ================= */
         ::-webkit-scrollbar { display: none; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body {
-            font-family: 'Prompt', sans-serif;
+            font-family: 'Prompt', -apple-system, sans-serif;
             background-color: var(--bg-base);
             color: var(--text-main);
             margin: 0; padding: 16px;
             display: flex; flex-direction: column;
-            height: 100dvh; /* ใช้ dvh เพื่อแก้บัคขอบจอมือถือ */
-            overflow: hidden;
+            height: 100dvh; overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -54,226 +51,202 @@
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
             background: var(--bg-surface);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
             padding: 14px 24px; border-radius: var(--radius-lg); margin-bottom: 16px;
             border: 1px solid var(--border); flex-shrink: 0;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-lg); z-index: 50; gap: 15px;
+            flex-wrap: wrap; 
         }
 
-        .topbar-main { display: flex; align-items: center; justify-content: space-between; gap: 15px;}
-        .brand { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px;}
-        .brand-icon { width: 22px; height: 22px; color: var(--primary); }
+        .topbar-main { display: flex; align-items: center; gap: 15px; }
+        .brand { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; white-space: nowrap;}
+        .brand-icon { width: 26px; height: 26px; color: var(--ios-blue); }
 
-        .topbar-actions { display: flex; align-items: center; gap: 8px; }
-
-        .btn-icon {
-            background: transparent; border: 1px solid var(--border);
-            color: var(--text-main); padding: 8px; border-radius: var(--radius-sm);
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.2s;
-        }
-        .btn-icon:hover { background: var(--bg-elevated); border-color: var(--border-hover); }
-
-        .menu-toggle {
-            display: none; /* ซ่อนบน PC */
-            background: var(--bg-elevated); border: 1px solid var(--border);
-            color: var(--text-main); padding: 8px; border-radius: var(--radius-sm);
-            cursor: pointer;
-        }
-
-        .controls { display: flex; align-items: center; gap: 12px; }
+        .topbar-actions { display: flex; align-items: center; gap: 12px; }
 
         .status-container {
-            display: flex; align-items: center; gap: 8px;
-            padding: 6px 14px; border-radius: 20px;
-            background: var(--bg-elevated); border: 1px solid var(--border);
-            font-size: 13px; font-weight: 500; color: var(--text-muted);
-            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 18px; border-radius: var(--radius-full);
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
+            font-size: 14px; font-weight: 500; white-space: nowrap;
         }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: 0.3s; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ios-gray); }
 
-        /* ================= LAYOUT ================= */
+        .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end;}
+
+        /* ================= BUTTONS ================= */
+        button {
+            font-family: inherit; font-size: 15px; font-weight: 600;
+            padding: 12px 24px; border-radius: var(--radius-md); border: none; cursor: pointer;
+            transition: var(--transition); color: white; display: flex; align-items: center; justify-content: center; gap: 8px;
+            white-space: nowrap; flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        button:active { transform: scale(0.96); opacity: 0.8; }
+
+        /* Hold Effect Styling */
+        .btn-holding {
+            background: var(--ios-blue) !important;
+            color: #fff !important;
+            box-shadow: 0 0 20px rgba(10, 132, 255, 0.6) !important;
+            transform: scale(0.95);
+        }
+        .btn-holding::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            animation: pulse-hold 0.6s infinite alternate;
+        }
+        @keyframes pulse-hold { from { opacity: 0.2; } to { opacity: 0.5; } }
+
+        #connectBtn { 
+            background: var(--ios-blue-light); color: var(--ios-blue);
+            border: 1px solid rgba(10, 132, 255, 0.3);
+        }
+        #connectBtn.ready { background: var(--ios-blue); color: #fff; }
+
+        .btn-primary { background: var(--ios-blue); box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3); }
+        .btn-danger { background: var(--ios-red-light); color: var(--ios-red); border: 1px solid rgba(255, 69, 58, 0.2); }
+        
+        .btn-icon-top {
+            background: rgba(255, 255, 255, 0.1); border-radius: var(--radius-full); padding: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ================= MAIN LAYOUT ================= */
         .main-grid { display: flex; flex: 1; gap: 16px; overflow: hidden; position: relative; }
 
-        /* ================= MENU (LINEAR STYLE) ================= */
         .sidebar {
-            width: 250px; min-width: 250px;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg); padding: 16px;
-            display: flex; flex-direction: column; gap: 6px;
-            border: 1px solid var(--border); overflow-y: auto;
-            transition: all 0.3s ease;
+            width: 260px; min-width: 260px;
+            background: var(--bg-surface); backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg); padding: 20px;
+            display: flex; flex-direction: column; gap: 10px;
+            border: 1px solid var(--border); overflow-y: auto; z-index: 10;
         }
 
         .nav-item {
             background: transparent; border: none; text-align: left; 
-            display: flex; align-items: center; gap: 12px;
-            color: var(--text-muted); padding: 12px 16px; width: 100%; 
-            font-size: 14px; font-weight: 500; border-radius: var(--radius-md);
-            transition: all 0.2s ease; cursor: pointer;
+            display: flex; align-items: center; gap: 14px;
+            color: var(--ios-gray); padding: 14px 18px; width: 100%; 
+            font-size: 16px; font-weight: 500; border-radius: var(--radius-md);
+            transition: var(--transition); cursor: pointer;
         }
-        .nav-icon { width: 18px; height: 18px; opacity: 0.7; transition: 0.2s; }
-        
-        .nav-item:hover { color: var(--text-main); background: var(--bg-elevated); }
-        .nav-item:hover .nav-icon { opacity: 1; color: var(--text-main); }
-        
-        .nav-item.active {
-            color: var(--bg-base); background: var(--text-main);
-            font-weight: 600; box-shadow: var(--shadow-sm);
-        }
-        .nav-item.active .nav-icon { opacity: 1; color: var(--bg-base); }
+        .nav-icon { width: 22px; height: 22px; opacity: 0.8; flex-shrink: 0;}
+        .nav-item:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: var(--ios-blue); background: rgba(10, 132, 255, 0.15); }
+        .nav-item.active .nav-icon { color: var(--ios-blue); opacity: 1; }
 
         /* ================= CONTENT PANEL ================= */
         .content-area {
             flex: 1; position: relative;
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg); padding: 40px;
+            background: var(--bg-surface); backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg); padding: 35px;
             border: 1px solid var(--border); overflow-y: auto;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
         }
 
-        .panel { display: none; max-width: 540px; margin: 0 auto; animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .panel { display: none; width: 100%; max-width: 650px; margin: 0 auto; animation: panelFade 0.4s ease forwards; }
         .panel.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes panelFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        h3 { 
-            margin-top: 0; padding-bottom: 16px; margin-bottom: 24px;
-            border-bottom: 1px solid var(--border); 
-            color: var(--text-main); font-size: 20px; font-weight: 600; 
-            display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px;
+        .panel-header { 
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 30px;
         }
+        h3 { margin: 0; color: var(--text-main); font-size: 22px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
 
-        /* ================= CLEAN PREMIUM INPUTS ================= */
+        /* ================= INPUTS & FORMS ================= */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
+        label { display: block; margin-bottom: 10px; color: var(--ios-gray); font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
         
         input[type="number"], .custom-select {
-            width: 100%; padding: 14px 16px; background: var(--bg-base);
+            width: 100%; padding: 14px 20px; background: var(--bg-elevated);
             border: 1px solid var(--border); border-radius: var(--radius-md);
-            color: var(--text-main); font-family: inherit; font-size: 15px;
-            transition: all 0.2s ease; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+            color: var(--text-main); font-family: inherit; font-size: 17px; font-weight: 500;
+            transition: var(--transition); outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
         }
-        input[type="number"]:hover, .custom-select:hover { border-color: var(--border-hover); }
-        input[type="number"]:focus, .custom-select:focus { 
-            border-color: var(--primary); 
-            background: #000;
-            box-shadow: 0 0 0 3px var(--primary-light), inset 0 1px 2px rgba(0,0,0,0.2); 
-        }
+        input[type="number"]:focus, .custom-select:focus { border-color: var(--ios-blue); background: var(--bg-base); }
 
         .custom-select {
             -webkit-appearance: none; appearance: none; cursor: pointer;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat; background-position: right 16px center; background-size: 16px;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 15px center; background-size: 18px;
         }
 
-        /* Flat Premium Slider */
-        .slider-group { display: flex; align-items: center; gap: 20px; }
-        input[type="range"] { flex: 1; -webkit-appearance: none; height: 6px; background: var(--border); border-radius: 6px; outline: none; }
+        /* Slider Component */
+        .slider-group { display: flex; align-items: center; gap: 20px; background: var(--bg-base); padding: 12px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); }
+        input[type="range"] { flex: 1; -webkit-appearance: none; height: 8px; background: rgba(255,255,255,0.15); border-radius: 10px; outline: none; }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
-            background: var(--text-main); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            transition: transform 0.1s;
+            -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
+            background: #fff; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+            border: 0.5px solid rgba(0,0,0,0.1);
         }
-        input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.1); }
-        .slider-group input[type="number"] { width: 80px; text-align: center; font-weight: 600; background: transparent; border-color: transparent; box-shadow: none; font-size: 18px; padding: 0; }
-        .slider-group input[type="number"]:focus { box-shadow: none; border-color: transparent; color: var(--primary); }
 
-        /* ================= MODERN BUTTONS ================= */
-        button {
-            font-family: inherit; font-size: 14px; font-weight: 500;
-            padding: 12px 20px; border-radius: var(--radius-md); border: none; cursor: pointer;
-            transition: all 0.2s;
-            color: white; display: flex; align-items: center; justify-content: center; gap: 8px;
+        .slider-group input[type="number"] { 
+            width: 85px; text-align: center; font-weight: 700; color: var(--ios-blue); 
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px; font-size: 18px; padding: 6px;
         }
-        button:active { transform: scale(0.97); }
 
-        .btn-primary { background: var(--text-main); color: var(--bg-base); font-weight: 600; box-shadow: 0 2px 10px rgba(255,255,255,0.1); }
-        .btn-primary:hover { background: #e4e4e7; }
-        
-        .btn-blue { background: var(--primary); font-weight: 600; }
-        .btn-blue:hover { background: var(--primary-hover); }
-
-        .btn-danger { background: var(--danger); font-weight: 600; }
-        .btn-danger:hover { background: var(--danger-hover); }
-
-        .btn-outline { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-main); }
-        .btn-outline:hover { background: var(--border); border-color: var(--border-hover); }
-        
-        /* ป้องกันจอเลื่อนเมื่อกดปุ่มค้าง */
-        #pidHoldBtn, #angleWalkBtn { touch-action: none; }
-        
-        /* กลุ่มปุ่มด้านล่างของ Panel */
-        .panel-actions { display: flex; gap: 12px; margin-top: 10px; }
+        .panel-actions { display: flex; gap: 15px; margin-top: 20px; }
         .panel-actions button { flex: 1; }
+        #pidHoldBtn, #angleWalkBtn { background: rgba(10, 132, 255, 0.1); color: var(--ios-blue); border: 1px solid rgba(10, 132, 255, 0.2); }
 
-        /* ================= MINIMAL JOYSTICK ================= */
-        #joyPanel { display: none; flex-direction: column; height: 100%; max-width: 100%; }
-        #joyPanel.active { display: flex; }
-        .joystick-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 280px; }
-        
-        #zone_joystick {
-            width: 240px; height: 240px; border-radius: 50%;
-            background: var(--bg-base); border: 2px solid var(--border);
-            position: relative; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
-            touch-action: none; 
+        /* ================= JOYSTICK & FULLSCREEN ================= */
+        .joy-container-view { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 20px; }
+        .joystick-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 280px; width: 100%; }
+        #zone_joystick { width: 260px; height: 260px; border-radius: 50%; background: var(--bg-base); border: 2px solid var(--border); position: relative; box-shadow: inset 0 4px 15px rgba(0,0,0,0.6); touch-action: none; }
+
+        /* Fullscreen View Setup */
+        body.fs-joy-mode .topbar, body.fs-joy-mode .sidebar, body.fs-joy-mode .panel-header, body.fs-joy-mode .form-group:not(.fs-keep) { display: none !important; }
+        body.fs-joy-mode .content-area { 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+            border-radius: 0; border: none; padding: 20px; z-index: 9999; 
+            background: var(--bg-base); display: flex; flex-direction: column; align-items: center; justify-content: center; 
         }
-        #zone_joystick::after {
-            content: ''; position: absolute; top: 50%; left: 50%; width: 60px; height: 60px;
-            background: var(--border); border-radius: 50%; transform: translate(-50%, -50%); opacity: 0.3;
+        body.fs-joy-mode #joyPanel { height: 100%; width: 100%; }
+        body.fs-joy-mode .joy-container-view { height: 100%; justify-content: center; gap: 40px; }
+        body.fs-joy-mode .form-group.fs-keep { width: 100%; max-width: 500px; margin-bottom: 0; background: var(--bg-surface); padding: 15px; border-radius: var(--radius-lg); }
+        body.fs-joy-mode #zone_joystick { width: 340px; height: 340px; border-color: rgba(255,255,255,0.2); }
+
+        /* Exit Button for Fullscreen - REDESIGNED FOR HIGH VISIBILITY */
+        .fs-close-btn { 
+            position: absolute; top: 40px; right: 40px; z-index: 10001; 
+            background: var(--ios-red); color: #fff; border-radius: 50%; width: 60px; height: 60px; 
+            display: none; justify-content: center; align-items: center; 
+            border: 3px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 20px rgba(255, 69, 58, 0.5);
+            cursor: pointer; transition: var(--transition);
         }
+        .fs-close-btn:hover { background: #ff5b52; transform: scale(1.1); }
+        body.fs-joy-mode .fs-close-btn { display: flex; }
 
         /* ================= MOBILE LAYOUT ================= */
         @media (max-width: 768px) {
-            body { padding: 12px; }
-            .topbar { flex-direction: column; align-items: stretch; padding: 12px; gap: 12px; }
+            body { padding: 0; }
+            .topbar { flex-direction: column; align-items: stretch; padding: 16px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); gap: 15px; margin-bottom: 0; border-top: none; }
+            .topbar-main { width: 100%; justify-content: space-between; }
+            .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+            .status-container { grid-column: span 2; justify-content: center; border: none; background: transparent; font-size: 13px; }
+            #connectBtn { grid-column: span 2; padding: 14px; }
+            .controls button { padding: 14px; width: 100%; border-radius: var(--radius-md); font-size: 14px;}
             
-            .topbar-main { width: 100%; }
-            .menu-toggle { display: flex; align-items: center; justify-content: center; }
-            
-            /* จัดเรียงปุ่มควบคุมให้ไม่ล้นจอ */
-            .controls { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 8px; }
-            .status-container { grid-column: span 2; justify-content: center; margin-bottom: 4px; }
-            #connectBtn { grid-column: span 2; }
-            .controls button { padding: 10px 12px; font-size: 13px; width: 100%; }
-
-            .main-grid { flex-direction: column; gap: 10px; }
-            
-            /* ปรับเมนูเป็นแบบ Dropdown เรียงลงมา (แก้บัคการทับกัน) */
-            .sidebar { 
-                position: absolute; top: 0; left: 0; right: 0;
-                z-index: 100;
-                background: rgba(24, 24, 27, 0.98); backdrop-filter: blur(10px);
-                border: 1px solid var(--border-hover);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-                display: none; 
-                flex-direction: column; /* บังคับให้เป็นแนวตั้ง */
-                align-items: stretch;
-                padding: 16px;
-                transform-origin: top;
-                animation: dropDown 0.2s ease forwards;
-                max-height: calc(100vh - 150px);
-            }
-            .sidebar.show-menu { display: flex; }
-            @keyframes dropDown { from { opacity: 0; transform: scaleY(0.9); } to { opacity: 1; transform: scaleY(1); } }
-            
-            .nav-item { padding: 14px 16px; border: 1px solid transparent; width: 100%; justify-content: flex-start; }
-
-            .content-area { padding: 20px 16px 80px 16px; } /* เพิ่ม Padding ล่างกันปุ่มล้นจอ */
+            .content-area { padding: 30px 20px 120px 20px; border-radius: 0; border: none; background: transparent; flex: 1; }
             .grid-2 { grid-template-columns: 1fr; gap: 0; }
+            .form-group { margin-bottom: 16px; }
+            .panel-actions { flex-direction: column; gap: 12px; }
             
-            /* ป้องกันปุ่มใน Panel ล้นจอ */
-            .panel-actions { flex-direction: column; gap: 10px; }
-            .panel-actions button { width: 100%; }
+            /* Bottom Tab Bar */
+            .sidebar { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; min-width: unset; height: 85px; flex-direction: row; justify-content: space-around; align-items: center; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: none; border-top: 1px solid var(--border); padding: 8px 5px 25px 5px; margin: 0; background: rgba(28, 28, 30, 0.9); box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+            .nav-item { flex-direction: column; gap: 5px; padding: 5px; height: 100%; justify-content: center; text-align: center; font-size: 11px; }
+            .nav-icon { width: 24px; height: 24px; margin: 0; }
+            .nav-item.active { background: transparent; color: var(--ios-blue); font-weight: 700; }
             
-            /* ปรับขนาดจอยให้พอดีจอมือถือ */
-            .slider-group { gap: 10px; }
-            .slider-group input[type="number"] { width: 60px; font-size: 16px; }
-            #zone_joystick { width: 220px; height: 220px; }
-            .joystick-wrapper { min-height: 240px; }
+            body.fs-joy-mode .fs-close-btn { top: 20px; right: 20px; width: 54px; height: 54px;}
         }
 
-        /* Utility Icons */
-        .icon-sm { width: 18px; height: 18px; }
+        .icon-sm { width: 20px; height: 20px; }
     </style>
 </head>
 <body>
@@ -284,406 +257,300 @@
             <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
             RP2350 Control
         </div>
-        
         <div class="topbar-actions">
-            <!-- ปุ่มเต็มจอ -->
-            <button class="btn-icon" onclick="toggleFullScreen()" title="เต็มหน้าจอ">
-                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-            </button>
-            <!-- ปุ่มเปิด/ปิด เมนูบนมือถือ -->
-            <button class="menu-toggle" onclick="toggleMenu()">
-                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <!-- ปุ่มสลับโหมดเต็มจอเบราว์เซอร์ -->
+            <button id="mainFsBtn" class="btn-icon-top" onclick="toggleFullScreen()" title="ขยายเต็มหน้าจอ">
+                <svg id="fs-icon" class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path id="fs-path" d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
             </button>
         </div>
     </div>
+    
     <div class="controls">
         <div id="status-container" class="status-container">
             <div id="status-dot" class="status-dot"></div>
             <span id="status-text">Disconnected</span>
         </div>
-        <button id="connectBtn" class="btn-blue">Connect</button>
-        <button class="btn-primary" onclick="sendCmd('CMD,START')">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            Start
-        </button>
-        <button class="btn-outline" style="color: var(--danger); border-color: var(--border-hover);" onclick="sendCmd('CMD,RST')">
-            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
-            Reset
-        </button>
+        <button id="connectBtn" onclick="requestBT()">เชื่อมต่อบลูทูธ</button>
+        <button class="btn-primary" onclick="sendCmd('CMD,START')">เริ่มทำงาน</button>
+        <button class="btn-danger" onclick="sendCmd('CMD,RST')">รีเซ็ตบอร์ด</button>
     </div>
 </div>
 
 <div class="main-grid">
-    <!-- แถบเมนูซ้ายมือ (บนมือถือจะซ่อนเป็น Dropdown) -->
     <div class="sidebar">
         <button class="nav-item active" onclick="switchPanel('calPanel', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line></svg>
-            คาลิเบรตเซ็นเซอร์
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line></svg>
+            <span class="nav-text">คาลิเบรต</span>
         </button>
         <button class="nav-item" onclick="switchPanel('pidPanel', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-            ตั้งค่าวิ่งตามเส้น
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <span class="nav-text">วิ่งเส้น</span>
         </button>
         <button class="nav-item" onclick="switchPanel('servoPanel', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-            แขนกลเซอร์โว
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+            <span class="nav-text">เซอร์โว</span>
         </button>
         <button class="nav-item" onclick="switchPanel('joyPanel', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><circle cx="16" cy="12" r="2"></circle><line x1="8" y1="10" x2="8" y2="14"></line><line x1="6" y1="12" x2="10" y2="12"></line></svg>
-            จอยสติ๊ก
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><circle cx="15.5" cy="12" r="2.5"></circle><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line></svg>
+            <span class="nav-text">จอยสติ๊ก</span>
         </button>
         <button class="nav-item" onclick="switchPanel('anglePanel', this)">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-            เข็มทิศ Gyro
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <span class="nav-text">องศา Gyro</span>
         </button>
     </div>
 
     <div class="content-area">
-        <!-- 1. คาลิเบรตแสง -->
-        <div id="calPanel" class="panel active" style="text-align: center; padding-top: 40px;">
-            <h3 style="border: none; justify-content: center; font-size: 24px;">ตั้งค่าเซ็นเซอร์แสงอัตโนมัติ</h3>
-            <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 15px; line-height: 1.6;">
-                วางหุ่นยนต์ให้เซ็นเซอร์อยู่ระหว่างเส้นสีขาวและสีดำ<br>ระบบจะทำการหมุนกวาดเพื่อบันทึกค่าแสงให้สมบูรณ์ที่สุด
-            </p>
-            <button class="btn-primary" style="width: 100%; padding: 16px; font-size: 16px;" onclick="sendCmd('CMD,CAL')">เริ่มกระบวนการสแกน</button>
+        <!-- ปุ่มกากบาททางออกโหมดเต็มจอ -->
+        <button class="fs-close-btn" onclick="toggleJoyFullscreen()" title="ออกจากโหมดเต็มจอ">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
+        <div id="calPanel" class="panel active">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 350px; text-align: center;">
+                <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--ios-blue-light); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 0 40px rgba(10, 132, 255, 0.2);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--ios-blue)" stroke-width="1.5" style="width: 50px; height: 50px;">
+                        <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle>
+                        <line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line>
+                        <line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line>
+                    </svg>
+                </div>
+                <h3 style="border: none; margin-bottom: 12px; font-size: 26px; justify-content: center;">ตั้งค่าแสงอัตโนมัติ</h3>
+                <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 16px; line-height: 1.6; max-width: 450px;">
+                    วางหุ่นยนต์ให้เซ็นเซอร์อยู่กึ่งกลางเส้นขาว-ดำ<br>ระบบจะกวาดเพื่อเก็บค่าความเข้มแสงที่ดีที่สุด
+                </p>
+                <button class="btn-primary" style="padding: 18px 50px; font-size: 17px; border-radius: var(--radius-full); width: 100%; max-width: 350px;" onclick="sendCmd('CMD,CAL')">เริ่มสแกนค่าแสง</button>
+            </div>
         </div>
 
-        <!-- 2. ตั้งค่า PID -->
         <div id="pidPanel" class="panel">
-            <h3>ตั้งค่าพารามิเตอร์ PID</h3>
+            <div class="panel-header"><h3>ตั้งค่าพารามิเตอร์ PID</h3></div>
             <div class="grid-2">
-                <div class="form-group"><label>ความเร็วการเคลื่อนที่ (Speed)</label><input type="number" id="pid_speed" value="50"></div>
-                <div class="form-group"><label>จำนวนแยกที่ผ่าน (Count)</label><input type="number" id="pid_count" value="1"></div>
+                <div class="form-group"><label>ความเร็ว</label><input type="number" id="pid_speed" value="50"></div>
+                <div class="form-group"><label>จำนวนแยก</label><input type="number" id="pid_count" value="1"></div>
             </div>
             <div class="grid-2">
-                <div class="form-group"><label>สัดส่วนความคลาดเคลื่อน (KP)</label><input type="number" id="pid_kp" value="1.0" step="0.1"></div>
-                <div class="form-group"><label>สัดส่วนความหน่วง (KD)</label><input type="number" id="pid_kd" value="5.0" step="0.1"></div>
+                <div class="form-group"><label>ค่า KP</label><input type="number" id="pid_kp" value="1.0" step="0.1"></div>
+                <div class="form-group"><label>ค่า KD</label><input type="number" id="pid_kd" value="5.0" step="0.1"></div>
             </div>
-            <div class="form-group"><label>พอร์ตเซ็นเซอร์ตรวจจับแยก</label><input type="number" id="pid_sensor" value="3"></div>
-            
+            <div class="form-group"><label>พอร์ตเซ็นเซอร์ตรวจแยก</label><input type="number" id="pid_sensor" value="3"></div>
             <div class="panel-actions">
-                <button class="btn-primary" onclick="sendPIDPass()">วิ่งผ่านแยกตามตั้งค่า</button>
-                <button id="pidHoldBtn" class="btn-outline">กดค้างเพื่อเช็คเส้น</button>
+                <button class="btn-primary" onclick="sendPIDPass()">สั่งวิ่งผ่านแยก</button>
+                <button id="pidHoldBtn">กดค้างเช็คเส้น</button>
             </div>
         </div>
 
-        <!-- 3. แขนกล (Servo) -->
         <div id="servoPanel" class="panel">
-            <h3>ควบคุมแขนกลเซอร์โว</h3>
+            <div class="panel-header"><h3>ควบคุมเซอร์โวมอเตอร์</h3></div>
             <div class="form-group">
-                <label>เลือกพอร์ตมอเตอร์</label>
+                <label>เลือกมอเตอร์</label>
                 <select id="srv_num" class="custom-select">
-                    <option value="1">Servo 1 (กลไกหลัก)</option>
-                    <option value="2">Servo 2 (กลไกหนีบ)</option>
-                    <option value="3">Servo 3 (พอร์ตเสริม)</option>
-                    <option value="4">Servo 4 (พอร์ตเสริม)</option>
-                    <option value="5">Servo 5 (พอร์ตเสริม)</option>
-                    <option value="6">Servo 6 (พอร์ตเสริม)</option>
+                    <option value="1">Servo 1</option><option value="2">Servo 2</option>
+                    <option value="3">Servo 3</option><option value="4">Servo 4</option>
+                    <option value="5">Servo 5</option><option value="6">Servo 6</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>กำหนดองศา (0° - 180°)</label>
+                <label>กำหนดองศา (0 - 180)</label>
                 <div class="slider-group">
                     <input type="range" id="srv_angle_range" min="0" max="180" value="90">
                     <input type="number" id="srv_angle_num" min="0" max="180" value="90">
                 </div>
             </div>
-            <button class="btn-primary" style="width: 100%; margin-top: 15px;" onclick="sendServo()">ตกลง</button>
+            <button class="btn-primary" style="width: 100%; margin-top: 15px;" onclick="sendServo()">ส่งคำสั่ง</button>
         </div>
 
-        <!-- 4. จอยสติ๊ก -->
         <div id="joyPanel" class="panel">
-            <h3 style="border: none; padding-bottom: 0;">บังคับทิศทางอิสระ</h3>
-            <div class="form-group" style="margin-bottom: 10px;">
-                <label>จำกัดความเร็วสูงสุด</label>
-                <div class="slider-group">
-                    <input type="range" id="joy_speed_range" min="10" max="100" value="50">
-                    <input type="number" id="joy_speed_num" min="10" max="100" value="50">
-                </div>
+            <div class="panel-header">
+                <h3>บังคับทิศทางอิสระ</h3>
+                <button class="btn-icon-top" onclick="toggleJoyFullscreen()" style="background: rgba(10, 132, 255, 0.15); color: var(--ios-blue);">
+                    <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path></svg>
+                </button>
             </div>
-            <div class="joystick-wrapper">
-                <div id="zone_joystick"></div>
+            <div class="joy-container-view">
+                <div class="form-group fs-keep" style="width: 100%; margin-bottom: 0;">
+                    <label style="text-align: center;">ความเร็วสูงสุด (0-100)</label>
+                    <div class="slider-group">
+                        <input type="range" id="joy_speed_range" min="0" max="100" value="50">
+                        <input type="number" id="joy_speed_num" min="0" max="100" value="50">
+                    </div>
+                </div>
+                <div class="joystick-wrapper"><div id="zone_joystick"></div></div>
             </div>
         </div>
 
-        <!-- 5. องศา Gyro -->
         <div id="anglePanel" class="panel">
-            <h3>ควบคุมการหมุนด้วย Gyroscope</h3>
-            <button class="btn-outline" style="width: 100%; margin-bottom: 24px; color: var(--danger); border-color: var(--danger);" onclick="sendCmd('CMD,GYRO_RST')">รีเซ็ตพิกัด Gyro เป็น 0 องศา</button>
+            <div class="panel-header"><h3>ทิศทาง Gyroscope</h3></div>
+            <button class="btn-danger" style="width: 100%; margin-bottom: 30px;" onclick="sendCmd('CMD,GYRO_RST')">รีเซ็ตพิกัดศูนย์ (Set 0)</button>
             <div class="form-group">
-                <label>ระบุองศาเป้าหมาย (+ ขวา, - ซ้าย)</label>
-                <input type="number" id="angle_target" value="90" style="text-align: center; font-size: 24px; font-weight: 600;">
+                <label>องศาเป้าหมาย</label>
+                <input type="number" id="angle_target" value="90" style="text-align: center; font-size: 26px; font-weight: 700; color: var(--ios-blue);">
             </div>
             <div class="panel-actions">
-                <button class="btn-primary" onclick="sendCmd(`CMD,ANGT,${document.getElementById('angle_target').value}`)">หันหน้าตามองศา</button>
-                <button id="angleWalkBtn" class="btn-outline">กดค้างเพื่อเดินรักษาทิศทาง</button>
+                <button class="btn-primary" onclick="sendCmd(`CMD,ANGT,${document.getElementById('angle_target').value}`)">หมุนตามองศา</button>
+                <button id="angleWalkBtn">กดค้างเดินตรง</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ================= FULLSCREEN TOGGLE =================
+    // --- FULLSCREEN LOGIC & ICON SWITCH ---
     function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
-                document.documentElement.msRequestFullscreen();
-            }
+        const iconPath = document.getElementById('fs-path');
+        // ไอคอนขยาย
+        const expandPath = "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3";
+        // ไอคอนย่อ
+        const shrinkPath = "M4 14h6m0 0v6m0-6l-7 7m13-7h6m-6 0v6m0-6l7 7M20 10h-6m0 0V4m0 6l7-7M10 4v6m0 0H4m6 0L3 3";
+
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            let docElm = document.documentElement;
+            if (docElm.requestFullscreen) docElm.requestFullscreen();
+            else if (docElm.webkitRequestFullscreen) docElm.webkitRequestFullscreen();
+            iconPath.setAttribute('d', shrinkPath);
         } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) { /* Safari */
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) { /* IE11 */
-                document.msExitFullscreen();
-            }
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            iconPath.setAttribute('d', expandPath);
         }
     }
 
-    // ================= MOBILE MENU TOGGLE =================
-    function toggleMenu() {
-        const sidebar = document.querySelector('.sidebar');
-        sidebar.classList.toggle('show-menu');
+    // Monitor Fullscreen Change to sync icon even if user exits with ESC
+    document.addEventListener('fullscreenchange', syncFsIcon);
+    document.addEventListener('webkitfullscreenchange', syncFsIcon);
+
+    function syncFsIcon() {
+        const iconPath = document.getElementById('fs-path');
+        const expandPath = "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3";
+        const shrinkPath = "M4 14h6m0 0v6m0-6l-7 7m13-7h6m-6 0v6m0-6l7 7M20 10h-6m0 0V4m0 6l7-7M10 4v6m0 0H4m6 0L3 3";
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            iconPath.setAttribute('d', shrinkPath);
+        } else {
+            iconPath.setAttribute('d', expandPath);
+        }
     }
 
-    // ================= AUTO-SAVE (LOCAL STORAGE) =================
-    const savedInputs = [
-        'pid_speed', 'pid_count', 'pid_kp', 'pid_kd', 'pid_sensor', 
-        'srv_num', 'srv_angle_range', 'srv_angle_num', 
-        'joy_speed_range', 'joy_speed_num', 'angle_target'
-    ];
-
-    function saveSettings() {
-        savedInputs.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) localStorage.setItem('rp2350_' + id, el.value);
-        });
+    let isJoyFullscreen = false;
+    function toggleJoyFullscreen() {
+        isJoyFullscreen = !isJoyFullscreen;
+        document.body.classList.toggle('fs-joy-mode', isJoyFullscreen);
+        destroyJoystick();
+        setTimeout(initJoystick, 150);
     }
 
-    function loadSettings() {
-        savedInputs.forEach(id => {
-            const val = localStorage.getItem('rp2350_' + id);
-            const el = document.getElementById(id);
-            if(val !== null && el) {
-                el.value = val;
-                // กระตุ้นให้ input เลื่อนสไลด์ซิงก์กันตอนโหลดเสร็จ
-                el.dispatchEvent(new Event('input')); 
-            }
-        });
-    }
+    async function requestBT() { if (port) return; try { await navigator.serial.requestPort(); } catch (e) {} }
 
-    // โหลดค่าที่เคยบันทึกไว้เมื่อเปิดเว็บ
-    window.addEventListener('DOMContentLoaded', () => {
-        loadSettings();
-        // ผูก Event ให้บันทึกอัตโนมัติเมื่อมีการเปลี่ยนแปลงค่าใดๆ
-        savedInputs.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) {
-                el.addEventListener('input', saveSettings);
-                el.addEventListener('change', saveSettings);
-            }
-        });
-    });
+    const savedInputs = ['pid_speed', 'pid_count', 'pid_kp', 'pid_kd', 'pid_sensor', 'srv_num', 'srv_angle_range', 'srv_angle_num', 'joy_speed_range', 'joy_speed_num', 'angle_target'];
+    function save() { savedInputs.forEach(id => { const el = document.getElementById(id); if(el) localStorage.setItem('rp2350_' + id, el.value); }); }
+    function load() { savedInputs.forEach(id => { const val = localStorage.getItem('rp2350_' + id); const el = document.getElementById(id); if(val !== null && el) { el.value = val; el.dispatchEvent(new Event('input')); } }); }
 
-    // ================= SYNC INPUTS =================
-    function bindInputs(rangeId, numId) {
+    window.addEventListener('DOMContentLoaded', () => { load(); savedInputs.forEach(id => { const el = document.getElementById(id); if(el) { el.addEventListener('input', save); el.addEventListener('change', save); } }); });
+
+    function bind(rangeId, numId) {
         const range = document.getElementById(rangeId);
         const num = document.getElementById(numId);
         range.addEventListener('input', () => num.value = range.value);
-        num.addEventListener('input', () => {
-            let val = parseInt(num.value);
-            if (val > parseInt(num.max)) num.value = num.max;
-            if (val < parseInt(num.min)) num.value = num.min;
-            range.value = num.value;
-        });
+        const upd = () => { 
+            let val = parseInt(num.value); 
+            if (isNaN(val)) return; 
+            val = Math.min(parseInt(num.max), Math.max(parseInt(num.min), val)); 
+            num.value = val; range.value = val; save(); 
+        };
+        num.addEventListener('input', upd); num.addEventListener('change', upd);
     }
-    bindInputs('srv_angle_range', 'srv_angle_num');
-    bindInputs('joy_speed_range', 'joy_speed_num');
+    bind('srv_angle_range', 'srv_angle_num'); bind('joy_speed_range', 'joy_speed_num');
 
-    // ================= PANEL SWITCHER =================
     function switchPanel(panelId, btn) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         document.getElementById(panelId).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-
-        // เมื่อใช้งานจอบนมือถือ ให้พับเมนูเก็บเมื่อเลือกเมนูเสร็จ
-        if (window.innerWidth <= 768) {
-            document.querySelector('.sidebar').classList.remove('show-menu');
-        }
-
         if (panelId === 'joyPanel') setTimeout(initJoystick, 100);
-        else destroyJoystick();
+        else { destroyJoystick(); if(isJoyFullscreen) toggleJoyFullscreen(); }
     }
 
-    // ================= BLUETOOTH CORE =================
     let port = null;
-
-    function setStatus(connected) {
+    function setStatus(conn) {
         const container = document.getElementById('status-container');
         const dot = document.getElementById('status-dot');
         const text = document.getElementById('status-text');
         const btn = document.getElementById('connectBtn');
-        
-        if (connected) {
-            container.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-            dot.style.background = 'var(--success)';
-            dot.style.boxShadow = '0 0 8px var(--success)';
-            text.style.color = 'var(--success)';
-            text.innerText = 'Connected';
-            btn.style.display = 'none';
+        if (conn) {
+            container.style.background = 'rgba(48, 209, 88, 0.15)';
+            container.style.borderColor = 'rgba(48, 209, 88, 0.3)';
+            dot.style.background = 'var(--ios-green)';
+            text.style.color = 'var(--ios-green)'; text.innerText = 'Online';
+            btn.classList.remove('ready'); btn.style.display = 'none';
         } else {
+            container.style.background = 'rgba(255, 255, 255, 0.05)';
             container.style.borderColor = 'var(--border)';
-            dot.style.background = 'var(--text-muted)';
-            dot.style.boxShadow = 'none';
-            text.style.color = 'var(--text-muted)';
-            text.innerText = 'Disconnected';
-            btn.style.display = 'inline-flex';
+            dot.style.background = 'var(--ios-gray)';
+            text.style.color = 'var(--ios-gray)'; text.innerText = 'Offline';
+            btn.classList.add('ready'); btn.style.display = 'flex'; 
         }
     }
 
-    async function autoConnectLoop() {
+    async function autoConnect() {
         if (port) return;
         try {
             const ports = await navigator.serial.getPorts();
             if (ports.length === 0) return;
-            const selectedPort = ports[0];
-            await selectedPort.open({ baudRate: 9600 });
-            port = selectedPort;
-            
+            const sp = ports[0]; await sp.open({ baudRate: 9600 }); port = sp;
             setStatus(true);
-
             while (port.readable) {
                 const reader = port.readable.getReader();
-                try {
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                    }
-                } catch (e) { break; } 
-                finally { reader.releaseLock(); }
+                try { while (true) { const { done } = await reader.read(); if (done) break; } }
+                catch (e) { break; } finally { reader.releaseLock(); }
             }
-        } catch (e) {} 
-        finally {
-            if (port) {
-                try { await port.close(); } catch(e) {}
-                port = null;
-                setStatus(false);
-            }
-        }
+        } catch (e) {} finally { if (port) { try { await port.close(); } catch(e) {} port = null; setStatus(false); } }
     }
-
-    setInterval(autoConnectLoop, 2000);
-
-    document.getElementById('connectBtn').addEventListener('click', async () => {
-        if (port) return; 
-        try { await navigator.serial.requestPort(); } catch (e) {}
-    });
+    setInterval(autoConnect, 2000);
 
     async function sendCmd(cmd) {
         if (!port || !port.writable) return;
-        const text = cmd + "\r\n";
-        const encoder = new TextEncoder();
         const writer = port.writable.getWriter();
-        try { await writer.write(encoder.encode(text)); } 
-        catch (e) {} 
-        finally { writer.releaseLock(); }
+        try { await writer.write(new TextEncoder().encode(cmd + "\r\n")); } catch (e) {} finally { writer.releaseLock(); }
     }
 
-    // ================= ACTIONS =================
-    function sendPIDPass() {
-        let s = document.getElementById('pid_speed').value;
-        let p = document.getElementById('pid_kp').value;
-        let d = document.getElementById('pid_kd').value;
-        let c = document.getElementById('pid_count').value;
-        let sn = document.getElementById('pid_sensor').value;
-        sendCmd(`CMD,PIDP,${s},${p},${d},${c},${sn}`);
-    }
+    function sendPIDPass() { sendCmd(`CMD,PIDP,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value},${document.getElementById('pid_count').value},${document.getElementById('pid_sensor').value}`); }
+    function sendServo() { sendCmd(`CMD,SRV,${document.getElementById('srv_num').value},${document.getElementById('srv_angle_num').value}`); }
 
-    function sendServo() {
-        sendCmd(`CMD,SRV,${document.getElementById('srv_num').value},${document.getElementById('srv_angle_num').value}`);
-    }
-
-    function setupHold(btnId, getCmd, stopCmd) {
-        const btn = document.getElementById(btnId);
-        let interval = null;
-        let isHolding = false;
-
-        const start = (e) => { 
-            if (e && e.cancelable) e.preventDefault();
-            if (isHolding) return;
-            isHolding = true;
-            let cmd = typeof getCmd === 'function' ? getCmd() : getCmd;
-            sendCmd(cmd); 
-            interval = setInterval(() => sendCmd(cmd), 150); 
+    function setupHold(id, getC, stopC) {
+        const btn = document.getElementById(id); let int = null, hold = false;
+        const st = (e) => { 
+            if (e && e.cancelable) e.preventDefault(); 
+            if (hold) return; 
+            hold = true; 
+            btn.classList.add('btn-holding'); 
+            sendCmd(getC()); 
+            int = setInterval(() => sendCmd(getC()), 150); 
         };
-
-        const stop = (e) => { 
-            if (e && e.cancelable) e.preventDefault();
-            if (!isHolding) return;
-            isHolding = false;
-            clearInterval(interval); 
-            sendCmd(stopCmd); 
+        const sp = (e) => { 
+            if (e && e.cancelable) e.preventDefault(); 
+            if (!hold) return; 
+            hold = false; 
+            btn.classList.remove('btn-holding'); 
+            clearInterval(int); 
+            sendCmd(stopC); 
         };
-        
-        ['mousedown', 'touchstart'].forEach(e => btn.addEventListener(e, start, {passive: false}));
-        ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(e => btn.addEventListener(e, stop, {passive: false}));
+        ['mousedown', 'touchstart'].forEach(e => btn.addEventListener(e, st, {passive: false}));
+        ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(e => btn.addEventListener(e, sp, {passive: false}));
     }
-
     setupHold('pidHoldBtn', () => `CMD,PIDH,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value}`, 'CMD,STOP');
     setupHold('angleWalkBtn', () => `CMD,ANGW,${document.getElementById('angle_target').value}`, 'CMD,STOP');
 
-    // ================= JOYSTICK =================
-    let joy, joyInterval;
-    let yVal = 0, xVal = 0;
-    let isJoyMoving = false;
-
+    let joy, joyInt, yV = 0, xV = 0, moving = false;
     function initJoystick() {
         if(joy) return;
-        joy = nipplejs.create({ 
-            zone: document.getElementById('zone_joystick'), 
-            mode: 'static', position: { left: '50%', top: '50%' }, 
-            color: '#fafafa', size: 140 
-        });
-
-        joy.on('move', (evt, data) => { 
-            isJoyMoving = true;
-            yVal = Math.sin(data.angle.radian) * data.distance; 
-            xVal = Math.cos(data.angle.radian) * data.distance; 
-        });
-
-        joy.on('end', () => { 
-            yVal = 0; xVal = 0; 
-            isJoyMoving = false;
-            sendCmd("CMD,STOP");
-        });
-
-        joyInterval = setInterval(() => {
-            if(!isJoyMoving) return; 
-
-            let maxSpd = parseInt(document.getElementById('joy_speed_num').value);
-            
-            let normY = yVal / 70; 
-            let normX = xVal / 70;
-            
-            let mLeft = (normY + normX) * maxSpd;
-            let mRight = (normY - normX) * maxSpd;
-            
-            mLeft = Math.max(-maxSpd, Math.min(maxSpd, mLeft));
-            mRight = Math.max(-maxSpd, Math.min(maxSpd, mRight));
-
-            sendCmd(`CMD,JOY,${Math.round(mLeft)},${Math.round(mRight)},${Math.round(mLeft)},${Math.round(mRight)}`);
-        }, 100);
+        let size = isJoyFullscreen ? (window.innerWidth > 500 ? 320 : 250) : 180;
+        joy = nipplejs.create({ zone: document.getElementById('zone_joystick'), mode: 'static', position: { left: '50%', top: '50%' }, color: '#0A84FF', size: size });
+        joy.on('move', (e, d) => { moving = true; yV = Math.sin(d.angle.radian) * d.distance; xV = Math.cos(d.angle.radian) * d.distance; });
+        joy.on('end', () => { yV = 0; xV = 0; moving = false; sendCmd("CMD,STOP"); });
+        joyInt = setInterval(() => { if(!moving) return; let spd = parseInt(document.getElementById('joy_speed_num').value); let hz = size / 2; let nY = yV / hz; let nX = xV / hz; let mL = (nY + nX) * spd; let mR = (nY - nX) * spd; sendCmd(`CMD,JOY,${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))},${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))}`); }, 100);
     }
-
-    function destroyJoystick() {
-        if(joy) { joy.destroy(); joy = null; }
-        clearInterval(joyInterval);
-    }
+    function destroyJoystick() { if(joy) { joy.destroy(); joy = null; } clearInterval(joyInt); }
 </script>
 </body>
 </html>
