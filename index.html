@@ -2,83 +2,579 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>เชื่อมต่อ HC-05</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RP2350 Command Center</title>
+    <!-- โหลดฟอนต์ Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding-top: 50px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 320px; text-align: center; }
-        button { background: #007bff; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; margin-bottom: 10px; font-size: 16px; transition: 0.3s; }
-        button:hover { background: #0056b3; }
-        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        textarea { resize: none; background: #f9f9f9; }
+        /* ================= PREMIUM MODERN VARIABLES ================= */
+        :root {
+            /* โทนสี Midnight Zinc (เรียบหรู สบายตา) */
+            --bg-base: #09090b;
+            --bg-surface: #18181b;
+            --bg-elevated: #27272a;
+            
+            /* สีสัน (Accent) */
+            --primary: #3b82f6; 
+            --primary-hover: #2563eb;
+            --primary-light: rgba(59, 130, 246, 0.1);
+            
+            --danger: #ef4444; 
+            --danger-hover: #dc2626;
+            --success: #10b981;
+
+            /* ข้อความ */
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+            
+            /* โครงสร้าง */
+            --border: #27272a;
+            --border-hover: #3f3f46;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            /* เงา */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ================= GLOBAL STYLES ================= */
+        ::-webkit-scrollbar { display: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            margin: 0; padding: 16px;
+            display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ================= TOP NAVIGATION ================= */
+        .topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-surface);
+            padding: 14px 24px; border-radius: var(--radius-lg); margin-bottom: 16px;
+            border: 1px solid var(--border); flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .brand { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px;}
+        .brand-icon { width: 22px; height: 22px; color: var(--primary); }
+
+        .controls { display: flex; align-items: center; gap: 12px; }
+
+        .status-container {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 14px; border-radius: 20px;
+            background: var(--bg-elevated); border: 1px solid var(--border);
+            font-size: 13px; font-weight: 500; color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: 0.3s; }
+
+        /* ================= LAYOUT ================= */
+        .main-grid { display: flex; flex: 1; gap: 16px; overflow: hidden; }
+
+        /* ================= MENU (LINEAR STYLE) ================= */
+        .sidebar {
+            width: 250px; min-width: 250px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg); padding: 16px;
+            display: flex; flex-direction: column; gap: 6px;
+            border: 1px solid var(--border); overflow-y: auto;
+        }
+
+        .nav-item {
+            background: transparent; border: none; text-align: left; 
+            display: flex; align-items: center; gap: 12px;
+            color: var(--text-muted); padding: 12px 16px; width: 100%; 
+            font-size: 14px; font-weight: 500; border-radius: var(--radius-md);
+            transition: all 0.2s ease; cursor: pointer;
+        }
+        .nav-icon { width: 18px; height: 18px; opacity: 0.7; transition: 0.2s; }
+        
+        .nav-item:hover { color: var(--text-main); background: var(--bg-elevated); }
+        .nav-item:hover .nav-icon { opacity: 1; color: var(--text-main); }
+        
+        .nav-item.active {
+            color: var(--bg-base); background: var(--text-main);
+            font-weight: 600; box-shadow: var(--shadow-sm);
+        }
+        .nav-item.active .nav-icon { opacity: 1; color: var(--bg-base); }
+
+        /* ================= CONTENT PANEL ================= */
+        .content-area {
+            flex: 1; position: relative;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg); padding: 40px;
+            border: 1px solid var(--border); overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .panel { display: none; max-width: 540px; margin: 0 auto; animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .panel.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h3 { 
+            margin-top: 0; padding-bottom: 16px; margin-bottom: 24px;
+            border-bottom: 1px solid var(--border); 
+            color: var(--text-main); font-size: 20px; font-weight: 600; 
+            display: flex; align-items: center; gap: 10px; letter-spacing: 0.5px;
+        }
+
+        /* ================= CLEAN PREMIUM INPUTS ================= */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 24px; }
+        label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 13px; font-weight: 500; }
+        
+        input[type="number"], .custom-select {
+            width: 100%; padding: 14px 16px; background: var(--bg-base);
+            border: 1px solid var(--border); border-radius: var(--radius-md);
+            color: var(--text-main); font-family: inherit; font-size: 15px;
+            transition: all 0.2s ease; outline: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+        }
+        input[type="number"]:hover, .custom-select:hover { border-color: var(--border-hover); }
+        input[type="number"]:focus, .custom-select:focus { 
+            border-color: var(--primary); 
+            background: #000;
+            box-shadow: 0 0 0 3px var(--primary-light), inset 0 1px 2px rgba(0,0,0,0.2); 
+        }
+
+        .custom-select {
+            -webkit-appearance: none; appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 16px center; background-size: 16px;
+        }
+
+        /* Flat Premium Slider */
+        .slider-group { display: flex; align-items: center; gap: 20px; }
+        input[type="range"] { flex: 1; -webkit-appearance: none; height: 6px; background: var(--border); border-radius: 6px; outline: none; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+            background: var(--text-main); cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.1); }
+        .slider-group input[type="number"] { width: 80px; text-align: center; font-weight: 600; background: transparent; border-color: transparent; box-shadow: none; font-size: 18px; padding: 0; }
+        .slider-group input[type="number"]:focus { box-shadow: none; border-color: transparent; color: var(--primary); }
+
+        /* ================= MODERN BUTTONS ================= */
+        button {
+            font-family: inherit; font-size: 14px; font-weight: 500;
+            padding: 12px 20px; border-radius: var(--radius-md); border: none; cursor: pointer;
+            transition: all 0.2s;
+            color: white; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        button:active { transform: scale(0.97); }
+
+        .btn-primary { background: var(--text-main); color: var(--bg-base); font-weight: 600; box-shadow: 0 2px 10px rgba(255,255,255,0.1); }
+        .btn-primary:hover { background: #e4e4e7; }
+        
+        .btn-blue { background: var(--primary); font-weight: 600; }
+        .btn-blue:hover { background: var(--primary-hover); }
+
+        .btn-danger { background: var(--danger); font-weight: 600; }
+        .btn-danger:hover { background: var(--danger-hover); }
+
+        .btn-outline { background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--border); border-color: var(--border-hover); }
+        
+        /* ป้องกันจอเลื่อนเมื่อกดปุ่มค้าง */
+        #pidHoldBtn, #angleWalkBtn {
+            touch-action: none;
+        }
+
+        /* ================= MINIMAL JOYSTICK ================= */
+        #joyPanel { display: none; flex-direction: column; height: 100%; max-width: 100%; }
+        #joyPanel.active { display: flex; }
+        .joystick-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 280px; }
+        
+        #zone_joystick {
+            width: 240px; height: 240px; border-radius: 50%;
+            background: var(--bg-base); border: 2px solid var(--border);
+            position: relative; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+            /* ล็อกการเลื่อนหน้าจอบนพื้นที่จอยสติ๊ก ป้องกันบัค Intervention */
+            touch-action: none; 
+        }
+        #zone_joystick::after {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 60px; height: 60px;
+            background: var(--border); border-radius: 50%; transform: translate(-50%, -50%); opacity: 0.3;
+        }
+
+        /* ================= MOBILE LAYOUT (APP-LIKE BOTTOM NAV) ================= */
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+            .topbar { flex-wrap: wrap; gap: 10px; padding: 12px 16px; border-radius: var(--radius-lg); margin-bottom: 10px; }
+            .brand { width: 100%; justify-content: center; margin-bottom: 4px; font-size: 18px; }
+            .controls { width: 100%; justify-content: space-between; }
+            button { padding: 10px 14px; font-size: 13px; }
+            
+            /* เปลี่ยน Flex-direction ให้เนื้อหาอยู่บน เมนูอยู่ล่าง */
+            .main-grid { flex-direction: column; gap: 8px; }
+            
+            /* พื้นที่เนื้อหาโดนดันไปอยู่ลำดับแรก */
+            .content-area { 
+                order: 1; 
+                padding: 20px 16px; 
+            }
+
+            /* แถบเมนูมือถือถูกย้ายลงมาด้านล่างสุด */
+            .sidebar { 
+                order: 2;
+                width: 100%; min-width: unset; flex-direction: row; 
+                padding: 8px; border-radius: var(--radius-lg);
+                overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;
+                flex-shrink: 0; /* ป้องกันแถบเมนูโดนบีบ */
+            }
+            .nav-item { 
+                flex: 0 0 auto; width: auto; padding: 10px 16px; 
+                margin-right: 8px; border-radius: 30px; 
+                background: var(--bg-elevated); border: 1px solid transparent; 
+                scroll-snap-align: start; white-space: nowrap; gap: 8px;
+                font-size: 13px;
+            }
+            .nav-item.active { background: var(--text-main); color: var(--bg-base); }
+            .nav-item.active .nav-icon { color: var(--bg-base); }
+
+            .grid-2 { grid-template-columns: 1fr; gap: 0; }
+            
+            #zone_joystick { width: 220px; height: 220px; }
+            .joystick-wrapper { min-height: 240px; }
+        }
+
+        /* Utility Icons */
+        .icon-sm { width: 18px; height: 18px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h3>🌐 ควบคุม HC-05 ผ่านเว็บ</h3>
-    <button id="connectBtn">เชื่อมต่อ Bluetooth (COM Port)</button>
-    <input type="text" id="sendData" placeholder="พิมพ์ข้อความที่ต้องการส่ง...">
-    <button id="sendBtn" style="background: #28a745;">ส่งข้อมูล</button>
-    <textarea id="output" rows="5" readonly placeholder="ข้อความจะแสดงที่นี่..."></textarea>
+<div class="topbar">
+    <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        RP2350 Control
+    </div>
+    <div class="controls">
+        <div id="status-container" class="status-container">
+            <div id="status-dot" class="status-dot"></div>
+            <span id="status-text">Disconnected</span>
+        </div>
+        <button id="connectBtn" class="btn-blue">Connect</button>
+        <button class="btn-primary" onclick="sendCmd('CMD,START')">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Start
+        </button>
+        <button class="btn-outline" style="color: var(--danger);" onclick="sendCmd('CMD,RST')">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            Reset
+        </button>
+    </div>
+</div>
+
+<div class="main-grid">
+    <div class="sidebar">
+        <button class="nav-item active" onclick="switchPanel('calPanel', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line></svg>
+            คาลิเบรตเซ็นเซอร์
+        </button>
+        <button class="nav-item" onclick="switchPanel('pidPanel', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            ตั้งค่าวิ่งตามเส้น
+        </button>
+        <button class="nav-item" onclick="switchPanel('servoPanel', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+            แขนกลเซอร์โว
+        </button>
+        <button class="nav-item" onclick="switchPanel('joyPanel', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><circle cx="16" cy="12" r="2"></circle><line x1="8" y1="10" x2="8" y2="14"></line><line x1="6" y1="12" x2="10" y2="12"></line></svg>
+            จอยสติ๊ก
+        </button>
+        <button class="nav-item" onclick="switchPanel('anglePanel', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            เข็มทิศ Gyro
+        </button>
+    </div>
+
+    <div class="content-area">
+        <!-- 1. คาลิเบรตแสง -->
+        <div id="calPanel" class="panel active" style="text-align: center; padding-top: 40px;">
+            <h3 style="border: none; justify-content: center; font-size: 24px;">ตั้งค่าเซ็นเซอร์แสงอัตโนมัติ</h3>
+            <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 15px; line-height: 1.6;">
+                วางหุ่นยนต์ให้เซ็นเซอร์อยู่ระหว่างเส้นสีขาวและสีดำ<br>ระบบจะทำการหมุนกวาดเพื่อบันทึกค่าแสงให้สมบูรณ์ที่สุด
+            </p>
+            <button class="btn-primary" style="width: 100%; padding: 16px; font-size: 16px;" onclick="sendCmd('CMD,CAL')">เริ่มกระบวนการสแกน</button>
+        </div>
+
+        <!-- 2. ตั้งค่า PID -->
+        <div id="pidPanel" class="panel">
+            <h3>ตั้งค่าพารามิเตอร์ PID</h3>
+            <div class="grid-2">
+                <div class="form-group"><label>ความเร็วการเคลื่อนที่ (Speed)</label><input type="number" id="pid_speed" value="50"></div>
+                <div class="form-group"><label>จำนวนแยกที่ผ่าน (Count)</label><input type="number" id="pid_count" value="1"></div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group"><label>สัดส่วนความคลาดเคลื่อน (KP)</label><input type="number" id="pid_kp" value="1.0" step="0.1"></div>
+                <div class="form-group"><label>สัดส่วนความหน่วง (KD)</label><input type="number" id="pid_kd" value="5.0" step="0.1"></div>
+            </div>
+            <div class="form-group"><label>พอร์ตเซ็นเซอร์ตรวจจับแยก</label><input type="number" id="pid_sensor" value="3"></div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 10px;">
+                <button class="btn-primary" style="flex: 1;" onclick="sendPIDPass()">วิ่งผ่านแยกตามตั้งค่า</button>
+                <button id="pidHoldBtn" class="btn-outline" style="flex: 1;">กดค้างเพื่อเช็คเส้น</button>
+            </div>
+        </div>
+
+        <!-- 3. แขนกล (Servo) -->
+        <div id="servoPanel" class="panel">
+            <h3>ควบคุมแขนกลเซอร์โว</h3>
+            <div class="form-group">
+                <label>เลือกพอร์ตมอเตอร์</label>
+                <select id="srv_num" class="custom-select">
+                    <option value="1">PORT 1 (กลไกหลัก)</option>
+                    <option value="2">PORT 2 (กลไกหนีบ)</option>
+                    <option value="3">PORT 3 (พอร์ตเสริม)</option>
+                    <option value="4">PORT 4 (พอร์ตเสริม)</option>
+                    <option value="5">PORT 5 (พอร์ตเสริม)</option>
+                    <option value="6">PORT 6 (พอร์ตเสริม)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>กำหนดองศา (0° - 180°)</label>
+                <div class="slider-group">
+                    <input type="range" id="srv_angle_range" min="0" max="180" value="90">
+                    <input type="number" id="srv_angle_num" min="0" max="180" value="90">
+                </div>
+            </div>
+            <button class="btn-primary" style="width: 100%; margin-top: 15px;" onclick="sendServo()">ตกลง</button>
+        </div>
+
+        <!-- 4. จอยสติ๊ก -->
+        <div id="joyPanel" class="panel">
+            <h3 style="border: none; padding-bottom: 0;">บังคับทิศทางอิสระ</h3>
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label>จำกัดความเร็วสูงสุด</label>
+                <div class="slider-group">
+                    <input type="range" id="joy_speed_range" min="10" max="100" value="50">
+                    <input type="number" id="joy_speed_num" min="10" max="100" value="50">
+                </div>
+            </div>
+            <div class="joystick-wrapper">
+                <div id="zone_joystick"></div>
+            </div>
+        </div>
+
+        <!-- 5. องศา Gyro -->
+        <div id="anglePanel" class="panel">
+            <h3>ควบคุมการหมุนด้วย Gyroscope</h3>
+            <button class="btn-outline" style="width: 100%; margin-bottom: 24px; color: var(--danger); border-color: var(--danger);" onclick="sendCmd('CMD,GYRO_RST')">รีเซ็ตพิกัด Gyro เป็น 0 องศา</button>
+            <div class="form-group">
+                <label>ระบุองศาเป้าหมาย (+ ขวา, - ซ้าย)</label>
+                <input type="number" id="angle_target" value="90" style="text-align: center; font-size: 24px; font-weight: 600;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn-primary" onclick="sendCmd(`CMD,ANGT,${document.getElementById('angle_target').value}`)">หันหน้าตามองศา</button>
+                <button id="angleWalkBtn" class="btn-outline">กดค้างเพื่อเดินรักษาทิศทาง</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    let port;
-    let writer;
-    let isConnected = false;
+    // ================= SYNC INPUTS =================
+    function bindInputs(rangeId, numId) {
+        const range = document.getElementById(rangeId);
+        const num = document.getElementById(numId);
+        range.addEventListener('input', () => num.value = range.value);
+        num.addEventListener('input', () => {
+            let val = parseInt(num.value);
+            if (val > parseInt(num.max)) num.value = num.max;
+            if (val < parseInt(num.min)) num.value = num.min;
+            range.value = num.value;
+        });
+    }
+    bindInputs('srv_angle_range', 'srv_angle_num');
+    bindInputs('joy_speed_range', 'joy_speed_num');
 
-    document.getElementById('connectBtn').addEventListener('click', async () => {
-        // เช็คว่าถ้าเชื่อมต่ออยู่แล้ว ไม่ต้องทำอะไรเพิ่ม
-        if (isConnected) {
-            alert("✅ พอร์ตเชื่อมต่ออยู่แล้วครับ สามารถพิมพ์ส่งข้อมูลได้เลย");
-            return;
+    // ================= PANEL SWITCHER =================
+    function switchPanel(panelId, btn) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(panelId).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (panelId === 'joyPanel') setTimeout(initJoystick, 100);
+        else destroyJoystick();
+    }
+
+    // ================= BLUETOOTH CORE =================
+    let port = null;
+
+    function setStatus(connected) {
+        const container = document.getElementById('status-container');
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+        const btn = document.getElementById('connectBtn');
+        
+        if (connected) {
+            container.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+            dot.style.background = 'var(--success)';
+            dot.style.boxShadow = '0 0 8px var(--success)';
+            text.style.color = 'var(--success)';
+            text.innerText = 'Connected';
+            btn.style.display = 'none';
+        } else {
+            container.style.borderColor = 'var(--border)';
+            dot.style.background = 'var(--text-muted)';
+            dot.style.boxShadow = 'none';
+            text.style.color = 'var(--text-muted)';
+            text.innerText = 'Disconnected';
+            btn.style.display = 'inline-flex';
         }
+    }
 
+    async function autoConnectLoop() {
+        if (port) return;
         try {
-            // ขอสิทธิ์และเลือกพอร์ต
-            port = await navigator.serial.requestPort();
+            const ports = await navigator.serial.getPorts();
+            if (ports.length === 0) return;
+            const selectedPort = ports[0];
+            await selectedPort.open({ baudRate: 9600 });
+            port = selectedPort;
             
-            // สั่งเปิดพอร์ตความเร็ว 9600
-            await port.open({ baudRate: 9600 }); 
-            
-            document.getElementById('output').value += "✅ เชื่อมต่อสำเร็จ!\n";
-            isConnected = true; 
-            document.getElementById('connectBtn').innerText = "เชื่อมต่อสำเร็จแล้ว";
-            document.getElementById('connectBtn').style.background = "#6c757d";
-            
-            // เตรียมตัวส่งข้อมูล
-            const textEncoder = new TextEncoderStream();
-            textEncoder.readable.pipeTo(port.writable);
-            writer = textEncoder.writable.getWriter();
+            setStatus(true);
 
-        } catch (error) {
-            console.error(error);
-            if (error.name === 'NetworkError') {
-                alert("❌ เปิดพอร์ตไม่ได้ครับ! กรุณาเช็คว่าปิด Serial Monitor ใน Arduino IDE หรือยัง");
-            } else {
-                alert("❌ การเชื่อมต่อล้มเหลว: " + error.message);
+            while (port.readable) {
+                const reader = port.readable.getReader();
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                    }
+                } catch (e) { break; } 
+                finally { reader.releaseLock(); }
+            }
+        } catch (e) {} 
+        finally {
+            if (port) {
+                try { await port.close(); } catch(e) {}
+                port = null;
+                setStatus(false);
             }
         }
+    }
+
+    setInterval(autoConnectLoop, 2000);
+
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+        if (port) return; 
+        try { await navigator.serial.requestPort(); } catch (e) {}
     });
 
-    document.getElementById('sendBtn').addEventListener('click', async () => {
-        if (!writer) return alert("กรุณาเชื่อมต่อ Bluetooth ก่อนครับ!");
+    async function sendCmd(cmd) {
+        if (!port || !port.writable) return;
+        const text = cmd + "\r\n";
+        const encoder = new TextEncoder();
+        const writer = port.writable.getWriter();
+        try { await writer.write(encoder.encode(text)); } 
+        catch (e) {} 
+        finally { writer.releaseLock(); }
+    }
+
+    // ================= ACTIONS =================
+    function sendPIDPass() {
+        let s = document.getElementById('pid_speed').value;
+        let p = document.getElementById('pid_kp').value;
+        let d = document.getElementById('pid_kd').value;
+        let c = document.getElementById('pid_count').value;
+        let sn = document.getElementById('pid_sensor').value;
+        sendCmd(`CMD,PIDP,${s},${p},${d},${c},${sn}`);
+    }
+
+    function sendServo() {
+        sendCmd(`CMD,SRV,${document.getElementById('srv_num').value},${document.getElementById('srv_angle_num').value}`);
+    }
+
+    // ปรับปรุงระบบปุ่ม Hold เพื่อลดบัค [Intervention] และการรันอีเวนต์ซ้อน
+    function setupHold(btnId, getCmd, stopCmd) {
+        const btn = document.getElementById(btnId);
+        let interval = null;
+        let isHolding = false;
+
+        const start = (e) => { 
+            if (e && e.cancelable) e.preventDefault(); // แก้บัค Intervention
+            if (isHolding) return; // กันการกดซ้ำซ้อนจากทัช
+            isHolding = true;
+            let cmd = typeof getCmd === 'function' ? getCmd() : getCmd;
+            sendCmd(cmd); 
+            interval = setInterval(() => sendCmd(cmd), 150); 
+        };
+
+        const stop = (e) => { 
+            if (e && e.cancelable) e.preventDefault();
+            if (!isHolding) return;
+            isHolding = false;
+            clearInterval(interval); 
+            sendCmd(stopCmd); 
+        };
         
-        try {
-            const text = document.getElementById('sendData').value;
-            // ส่งข้อความพร้อมรหัสจบบรรทัด \r\n เพื่อให้ Arduino อ่านค่าง่ายขึ้น
-            await writer.write(text + "\r\n"); 
-            document.getElementById('output').value += "➡️ ส่ง: " + text + "\n";
-            document.getElementById('sendData').value = ""; 
-        } catch (error) {
-            console.error(error);
-            alert("❌ ส่งข้อมูลไม่สำเร็จ การเชื่อมต่ออาจหลุดไปแล้ว");
-            isConnected = false; 
-            document.getElementById('connectBtn').innerText = "เชื่อมต่อ Bluetooth (COM Port)";
-            document.getElementById('connectBtn').style.background = "#007bff";
-        }
-    });
-</script>
+        ['mousedown', 'touchstart'].forEach(e => btn.addEventListener(e, start, {passive: false}));
+        ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(e => btn.addEventListener(e, stop, {passive: false}));
+    }
 
+    setupHold('pidHoldBtn', () => `CMD,PIDH,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value}`, 'CMD,STOP');
+    setupHold('angleWalkBtn', () => `CMD,ANGW,${document.getElementById('angle_target').value}`, 'CMD,STOP');
+
+    // ================= JOYSTICK =================
+    let joy, joyInterval;
+    let yVal = 0, xVal = 0;
+    let isJoyMoving = false;
+
+    function initJoystick() {
+        if(joy) return;
+        joy = nipplejs.create({ 
+            zone: document.getElementById('zone_joystick'), 
+            mode: 'static', position: { left: '50%', top: '50%' }, 
+            color: '#fafafa', size: 140 
+        });
+
+        joy.on('move', (evt, data) => { 
+            isJoyMoving = true;
+            yVal = Math.sin(data.angle.radian) * data.distance; 
+            xVal = Math.cos(data.angle.radian) * data.distance; 
+        });
+
+        joy.on('end', () => { 
+            yVal = 0; xVal = 0; 
+            isJoyMoving = false;
+            sendCmd("CMD,STOP"); // ลดการส่งข้อมูลไปบลูทูธให้ส่งหยุดแค่ 1 ครั้ง
+        });
+
+        joyInterval = setInterval(() => {
+            if(!isJoyMoving) return; // ไม่ทำงานหากจอยอยู่นิ่ง ๆ (ลดภาระ Bluetooth)
+
+            let maxSpd = parseInt(document.getElementById('joy_speed_num').value);
+            
+            let normY = yVal / 70; 
+            let normX = xVal / 70;
+            
+            let mLeft = (normY + normX) * maxSpd;
+            let mRight = (normY - normX) * maxSpd;
+            
+            mLeft = Math.max(-maxSpd, Math.min(maxSpd, mLeft));
+            mRight = Math.max(-maxSpd, Math.min(maxSpd, mRight));
+
+            sendCmd(`CMD,JOY,${Math.round(mLeft)},${Math.round(mRight)},${Math.round(mLeft)},${Math.round(mRight)}`);
+        }, 100);
+    }
+
+    function destroyJoystick() {
+        if(joy) { joy.destroy(); joy = null; }
+        clearInterval(joyInterval);
+    }
+</script>
 </body>
 </html>
