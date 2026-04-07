@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
     <style>
-        /* ================= PREMIUM DARK THEME VARIABLES ================= */
         :root {
             --bg-deep: #050507;
             --bg-gradient: radial-gradient(circle at 50% 0%, #1a1a24 0%, #050507 100%);
@@ -40,12 +39,10 @@
             --transition-fast: all 0.2s ease;
         }
 
-        /* ================= RESET & GLOBAL ================= */
         ::-webkit-scrollbar { display: none; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
 
         body {
-            /* ใช้ฟอนต์ Inter นำหน้าสำหรับตัวเลข/ภาษาอังกฤษ และ Kanit สำหรับภาษาไทย */
             font-family: 'Inter', 'Kanit', -apple-system, sans-serif;
             background: var(--bg-deep);
             background-image: var(--bg-gradient);
@@ -57,14 +54,12 @@
             overscroll-behavior-y: none;
         }
 
-        /* Background Pattern Effect */
         body::before {
             content: ''; position: fixed; inset: 0;
             background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
             background-size: 24px 24px; z-index: -1; pointer-events: none;
         }
 
-        /* ================= TOP NAVIGATION ================= */
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
             background: var(--bg-surface);
@@ -85,7 +80,6 @@
         }
         .brand-icon { width: 26px; height: 26px; color: var(--accent-blue); -webkit-text-fill-color: var(--accent-blue); }
         
-        /* จุดแสดงสถานะขนาดเล็ก ข้างชื่อ Brand (แสดงเฉพาะมือถือ) */
         #brand-status-indicator {
             width: 10px; height: 10px; border-radius: 50%;
             background: var(--accent-green);
@@ -106,7 +100,6 @@
         }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-sec); box-shadow: 0 0 10px transparent; transition: var(--transition-smooth);}
 
-        /* ================= BUTTONS ================= */
         button {
             font-family: inherit; font-size: 14px; font-weight: 500; letter-spacing: 0.5px;
             padding: 12px 24px; border-radius: var(--radius-md); border: none; cursor: pointer;
@@ -137,13 +130,30 @@
             display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;
         }
 
-        /* Hold Effect Styling */
         .btn-holding {
             background: var(--accent-blue) !important; color: #fff !important;
             box-shadow: 0 0 25px var(--accent-blue-glow) !important; transform: scale(0.95);
         }
 
-        /* ================= MAIN LAYOUT ================= */
+        /* --- MODAL CSS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center; z-index: 999999;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-box {
+            background: var(--bg-surface); padding: 24px; border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light); width: 90%; max-width: 340px;
+            display: flex; flex-direction: column; gap: 15px; box-shadow: var(--shadow-float);
+            transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-box h3 { text-align: center; font-size: 18px; margin-bottom: 5px; color: #fff; }
+        .modal-box p { text-align: center; font-size: 14px; color: var(--text-sec); margin-bottom: 10px; line-height: 1.5; }
+        .modal-box button { width: 100%; padding: 14px; font-size: 15px; }
+
         .main-grid { display: flex; flex: 1; gap: 20px; overflow: hidden; position: relative; padding: 0 16px 20px 16px; }
 
         .sidebar {
@@ -169,7 +179,6 @@
         }
         .nav-item.active .nav-icon { color: var(--accent-blue); opacity: 1; filter: drop-shadow(0 0 8px var(--accent-blue-glow));}
 
-        /* ================= CONTENT PANEL ================= */
         .content-area {
             flex: 1; position: relative;
             background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -187,9 +196,8 @@
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 30px;
         }
-        h3 { color: #fff; font-size: 22px; font-weight: 500; display: flex; align-items: center; gap: 12px; }
+        h3 { color: #fff; font-size: 22px; font-weight: 500; display: flex; align-items: center; gap: 12px; margin: 0; }
 
-        /* ================= INPUTS & FORMS ================= */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { margin-bottom: 24px; width: 100%; }
         label { display: block; margin-bottom: 10px; color: var(--text-sec); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
@@ -213,7 +221,6 @@
         }
         .custom-select option { background-color: #1a1a24; color: #ffffff; font-size: 16px; }
 
-        /* Slider */
         .slider-group { 
             display: flex; align-items: center; gap: 15px; 
             background: rgba(0,0,0,0.2); padding: 12px 15px; 
@@ -235,7 +242,6 @@
         .panel-actions { display: flex; gap: 15px; margin-top: 25px; }
         .panel-actions button { flex: 1; padding: 16px; }
 
-        /* ================= JOYSTICK & FULLSCREEN ================= */
         .joy-container-view { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 30px; }
         .joystick-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 280px; width: 100%; touch-action: none; position: relative;}
         
@@ -247,7 +253,6 @@
             touch-action: none; 
         }
 
-        /* ---------------- Fullscreen Mode Styles (Fixed & Bulletproof Layout) ---------------- */
         body.fs-joy-mode .topbar, 
         body.fs-joy-mode .sidebar, 
         body.fs-joy-mode .panel-header, 
@@ -256,85 +261,41 @@
         }
         
         body.fs-joy-mode #joyPanel { 
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            max-width: none !important;
-            margin: 0 !important;
+            position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important;
+            max-width: none !important; margin: 0 !important;
             padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)) 20px !important;
-            background: var(--bg-deep) !important;
-            background-image: var(--bg-gradient) !important;
-            z-index: 9999 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            border-radius: 0 !important;
+            background: var(--bg-deep) !important; background-image: var(--bg-gradient) !important;
+            z-index: 9999 !important; display: flex !important; flex-direction: column !important;
+            align-items: center !important; justify-content: center !important; border-radius: 0 !important;
         }
 
-        body.fs-joy-mode .joy-container-view {
-            width: 100% !important;
-            height: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 40px !important;
-        }
-
+        body.fs-joy-mode .joy-container-view { width: 100% !important; height: 100% !important; gap: 40px !important; }
         body.fs-joy-mode .form-group.fs-keep { 
-            width: 100% !important; 
-            max-width: 500px !important; 
-            margin: 0 auto !important; 
-            background: rgba(28,28,32,0.8) !important; 
-            padding: 20px !important; 
-            border-radius: var(--radius-lg) !important; 
-            border: 1px solid var(--border-light) !important; 
+            width: 100% !important; max-width: 500px !important; margin: 0 auto !important; 
+            background: rgba(28,28,32,0.8) !important; padding: 20px !important; 
+            border-radius: var(--radius-lg) !important; border: 1px solid var(--border-light) !important; 
             backdrop-filter: blur(10px) !important;
         }
 
         .fs-close-btn { 
-            position: fixed; 
-            top: 24px; right: 24px;
-            top: max(24px, env(safe-area-inset-top)); 
-            right: max(24px, env(safe-area-inset-right)); 
-            z-index: 100000; 
-            background: var(--accent-red); color: #ffffff; 
-            border-radius: 50%; width: 56px; height: 56px; 
-            display: none; justify-content: center; align-items: center; 
-            border: 3px solid rgba(255, 255, 255, 0.3); 
-            box-shadow: 0 8px 25px var(--accent-red-glow);
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0; transform: scale(0.5);
+            position: fixed; top: max(24px, env(safe-area-inset-top)); right: max(24px, env(safe-area-inset-right)); 
+            z-index: 100000; background: var(--accent-red); color: #ffffff; border-radius: 50%; width: 56px; height: 56px; 
+            display: none; justify-content: center; align-items: center; border: 3px solid rgba(255, 255, 255, 0.3); 
+            box-shadow: 0 8px 25px var(--accent-red-glow); cursor: pointer; opacity: 0; transform: scale(0.5);
         }
-        
-        .fs-close-btn svg { 
-            width: 28px !important; 
-            height: 28px !important; 
-            flex-shrink: 0 !important;
-            stroke: #ffffff !important;
-        }
-        
+        .fs-close-btn svg { width: 28px !important; height: 28px !important; flex-shrink: 0 !important; stroke: #ffffff !important; }
         body.fs-joy-mode .fs-close-btn { display: flex; opacity: 1; transform: scale(1); animation: popIn 0.5s ease forwards; }
         .fs-close-btn:active { transform: scale(0.85) !important; background: #d9362b; }
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.5) rotate(-45deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
 
-        /* ================= MOBILE LAYOUT (Compact Topbar) ================= */
         @media (max-width: 800px) {
             .topbar { 
-                flex-direction: column; align-items: stretch; 
-                padding: max(12px, env(safe-area-inset-top)) 16px 12px; 
-                border-radius: 0 0 var(--radius-lg) var(--radius-lg); 
-                gap: 12px; margin: 0; border-top: none; border-left: none; border-right: none;
+                flex-direction: column; align-items: stretch; padding: max(12px, env(safe-area-inset-top)) 16px 12px; 
+                border-radius: 0 0 var(--radius-lg) var(--radius-lg); gap: 12px; margin: 0; border-top: none; border-left: none; border-right: none;
             }
             .topbar-main { width: 100%; justify-content: space-between; }
-            
             .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-            .status-badge { 
-                grid-column: span 1; justify-content: center; 
-                background: rgba(0,0,0,0.3); padding: 8px; font-size: 12px; border-radius: var(--radius-md);
-            }
+            .status-badge { grid-column: span 1; justify-content: center; background: rgba(0,0,0,0.3); padding: 8px; font-size: 12px; border-radius: var(--radius-md); }
             #connectBtn { grid-column: span 1; padding: 10px; font-size: 13px; }
             .controls button { padding: 10px 8px; width: 100%; font-size: 13px;}
             
@@ -342,10 +303,7 @@
             body.is-connected #brand-status-indicator { display: block !important; }
 
             .main-grid { padding: 0; flex-direction: column; }
-            .content-area { 
-                padding: 24px 20px calc(140px + env(safe-area-inset-bottom)) 20px; 
-                border-radius: 0; border: none; background: transparent; box-shadow: none;
-            }
+            .content-area { padding: 24px 20px calc(140px + env(safe-area-inset-bottom)) 20px; border-radius: 0; border: none; background: transparent; box-shadow: none; }
             
             .panel-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 25px; }
             .panel-header h3 { font-size: 20px; }
@@ -356,27 +314,19 @@
             .panel-actions { flex-direction: column; gap: 12px; }
             
             .sidebar { 
-                position: fixed; bottom: 0; left: 0; right: 0; 
-                width: 100%; min-width: unset; height: auto; 
+                position: fixed; bottom: 0; left: 0; right: 0; width: 100%; min-width: unset; height: auto; 
                 flex-direction: row; justify-content: space-between; align-items: center; 
-                border-radius: var(--radius-lg) var(--radius-lg) 0 0; 
-                border: none; border-top: 1px solid var(--border-strong); 
-                padding: 12px 10px max(15px, env(safe-area-inset-bottom)) 10px; 
-                margin: 0; background: rgba(20, 20, 24, 0.95); 
-                box-shadow: 0 -10px 30px rgba(0,0,0,0.8); 
-                z-index: 9000;
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: none; border-top: 1px solid var(--border-strong); 
+                padding: 12px 10px max(15px, env(safe-area-inset-bottom)) 10px; margin: 0; background: rgba(20, 20, 24, 0.95); 
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 9000;
             }
             .nav-item { 
-                flex-direction: column; gap: 6px; padding: 8px 4px; height: auto; 
-                justify-content: center; align-items: center; text-align: center; font-size: 11px; flex: 1;
-                border-radius: 12px; background: transparent; border: none; box-shadow: none;
+                flex-direction: column; gap: 6px; padding: 8px 4px; height: auto; justify-content: center; align-items: center; 
+                text-align: center; font-size: 11px; flex: 1; border-radius: 12px; background: transparent; border: none; box-shadow: none;
             }
             .nav-icon { width: 24px; height: 24px; margin: 0; }
             .nav-item.active { background: transparent; color: var(--accent-blue); }
-            .nav-item::after {
-                content: ''; display: block; width: 4px; height: 4px; border-radius: 50%;
-                background: transparent; transition: var(--transition-smooth); margin-top: 2px;
-            }
+            .nav-item::after { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: transparent; transition: var(--transition-smooth); margin-top: 2px; }
             .nav-item.active::after { background: var(--accent-blue); box-shadow: 0 0 8px var(--accent-blue); }
         }
 
@@ -393,10 +343,20 @@
 </head>
 <body>
 
+<div id="connModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>เชื่อมต่ออุปกรณ์</h3>
+        <p>เลือกวิธีเชื่อมต่อระหว่างอุปกรณ์กับบอร์ด RP2350</p>
+        <button class="btn-primary" onclick="connectUSB()">🔌 สาย USB (เสียบ OTG)</button>
+        <button class="btn-primary" style="background: rgba(255,255,255,0.1); border-color: var(--border-strong);" onclick="connectBT()">📶 บลูทูธ (Bluetooth)</button>
+        <button class="btn-danger" style="margin-top: 10px; background: transparent; border: none; color: var(--text-sec);" onclick="closeModal()">ยกเลิก</button>
+    </div>
+</div>
+
 <div class="topbar">
     <div class="topbar-main">
         <div class="brand">
-            <svg class="brand-icon" ondblclick="requestBT()" style="cursor: pointer; pointer-events: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <svg class="brand-icon" ondblclick="openConnModal()" style="cursor: pointer; pointer-events: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
             RP2350 Command
             <div id="brand-status-indicator"></div>
         </div>
@@ -413,7 +373,7 @@
                 <div id="status-dot" class="status-dot"></div>
                 <span id="status-text">Disconnected</span>
             </div>
-            <button id="connectBtn" onclick="requestBT()">เชื่อมต่ออุปกรณ์</button>
+            <button id="connectBtn" onclick="openConnModal()">เชื่อมต่ออุปกรณ์</button>
             <button class="btn-primary" onclick="sendCmd('CMD,START')">เริ่มทำงาน</button>
             <button class="btn-danger" onclick="sendCmd('CMD,RST')">รีเซ็ต</button>
         </div>
@@ -543,9 +503,8 @@
 <script type="module">
     import { serial as usbSerial } from 'https://cdn.jsdelivr.net/npm/web-serial-polyfill@1.0.15/dist/serial.js';
 
-    // แยก API ออกจากกันชัดเจน
-    const btAPI = navigator.serial; // ระบบบลูทูธดั้งเดิม (และ USB สำหรับ PC)
-    const usbAPI = usbSerial;       // ระบบสาย USB สำหรับมือถือ (Polyfill)
+    const btAPI = navigator.serial; 
+    const usbAPI = usbSerial;       
 
     window.toggleFullScreen = function() {
         const iconPath = document.getElementById('fs-path');
@@ -586,32 +545,39 @@
         setTimeout(initJoystick, 200); 
     };
 
-    // ปรับปรุงฟังก์ชันเชื่อมต่อ ให้ถามตัวเลือกบนมือถือ
-    window.requestBT = async function() { 
-        if (port) return; 
-        try { 
-            const isAndroid = /android/i.test(navigator.userAgent);
-            if (isAndroid) {
-                // บนมือถือ ให้มี Popup ถามผู้ใช้
-                const useUSB = confirm("เลือกวิธีการเชื่อมต่อกับบอร์ด:\n\n👉 [ตกลง / OK] = เสียบสาย USB (OTG)\n👉 [ยกเลิก / Cancel] = ผ่านบลูทูธ");
-                if (useUSB) {
-                    await usbAPI.requestPort();
-                } else {
-                    if (!btAPI) throw new Error("ไม่รองรับ Bluetooth บนเบราว์เซอร์นี้");
-                    await btAPI.requestPort();
-                }
-            } else {
-                // บนคอมพิวเตอร์ ระบบจะจัดการหน้าต่างเดียวได้ทั้งสองแบบอยู่แล้ว
-                if (!btAPI) throw new Error("ไม่รองรับ Web Serial บนเบราว์เซอร์นี้");
-                await btAPI.requestPort();
-            }
-            autoConnect(); 
-        } catch (e) {
-            console.error("Connection canceled or failed:", e);
-        } 
+    // --- ระบบเรียก Modal ---
+    window.openConnModal = function() {
+        if (port) return;
+        const isAndroid = /android/i.test(navigator.userAgent);
+        if (isAndroid) {
+            document.getElementById('connModal').classList.add('show');
+        } else {
+            window.connectBT(); // PC ข้ามหน้าถามไปใช้ Bluetooth/Serial ปกติเลย
+        }
     };
 
-    // ================= ระบบความจำสมบูรณ์แบบ (Save/Load All) =================
+    window.closeModal = function() {
+        document.getElementById('connModal').classList.remove('show');
+    };
+
+    window.connectUSB = async function() {
+        window.closeModal();
+        try {
+            await usbAPI.requestPort();
+            autoConnect();
+        } catch(e) { console.error(e); }
+    };
+
+    window.connectBT = async function() {
+        window.closeModal();
+        try {
+            if (!btAPI) throw new Error("ไม่รองรับ Web Serial บนเบราว์เซอร์นี้");
+            await btAPI.requestPort();
+            autoConnect();
+        } catch(e) { console.error(e); }
+    };
+
+    // --- ระบบความจำ (Save/Load) ---
     function saveAllState() {
         document.querySelectorAll('input, select').forEach(el => {
             if(el.id) localStorage.setItem('rp_save_' + el.id, el.value);
@@ -677,7 +643,7 @@
         }
     };
 
-    // ================= ระบบเชื่อมต่อและ Auto-Reconnect (แบบผสม 2 API) =================
+    // --- Auto-Reconnect & Serial Handling ---
     let port = null;
     let isConnecting = false;
 
@@ -711,14 +677,10 @@
         isConnecting = true;
         try {
             let sp = null;
-            
-            // เช็คว่าเคยเชื่อมกับพอร์ตไหนไว้บ้าง เริ่มจาก Bluetooth / PC ปกติ
             if (btAPI) {
                 const btPorts = await btAPI.getPorts();
                 if (btPorts.length > 0) sp = btPorts[0];
             }
-            
-            // ถ้าไม่เจอในบลูทูธ ให้มาเช็คประวัติพอร์ตสาย USB (มือถือ)
             if (!sp && usbAPI) {
                 const usbPorts = await usbAPI.getPorts();
                 if (usbPorts.length > 0) sp = usbPorts[0];
@@ -744,7 +706,6 @@
                 }
             }
         } catch (e) {
-            // ไม่ปริ้นท์ error เพื่อไม่ให้กวนคอนโซลเวลามันพยายามวนหาอุปกรณ์
         } finally { 
             isConnecting = false;
             if (port) { 
@@ -757,7 +718,6 @@
     
     setInterval(autoConnect, 2000);
 
-    // ดัก Event การเสียบสายเข้า/ออก ทั้ง 2 API
     const handleConnect = () => setTimeout(autoConnect, 500);
     const handleDisconnect = (event) => {
         if (port === event.target || port === event.port) {
@@ -774,6 +734,7 @@
         usbAPI.addEventListener("disconnect", handleDisconnect);
     }
 
+    // --- คำสั่งเชื่อมต่อปุ่มกดต่างๆ ---
     window.sendCmd = async function(cmd) {
         if (!port || !port.writable) return;
         const writer = port.writable.getWriter();
@@ -808,11 +769,11 @@
     setupHold('pidHoldBtn', () => `CMD,PIDH,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value}`, 'CMD,STOP');
     setupHold('angleWalkBtn', () => `CMD,ANGW,${document.getElementById('angle_target').value}`, 'CMD,STOP');
 
+    // --- JOYSTICK ---
     let joy, joyInt, yV = 0, xV = 0, moving = false;
     
     function initJoystick() {
         if(joy) return;
-        
         let screenW = window.innerWidth;
         let screenH = window.innerHeight;
         let size;
