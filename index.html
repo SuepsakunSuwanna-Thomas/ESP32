@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RP2350 Command Center</title>
-    <!-- โหลดฟอนต์ Google Fonts: Inter (Eng/Num) และ Kanit (Thai แบบไม่มีหัว ทันสมัย) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -400,7 +399,7 @@
 <div class="topbar">
     <div class="topbar-main">
         <div class="brand">
-            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <svg class="brand-icon" ondblclick="requestBT()" style="cursor: pointer; pointer-events: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
             RP2350 Command
             <div id="brand-status-indicator"></div>
         </div>
@@ -450,7 +449,6 @@
 
     <div class="content-area">
         
-        <!-- ย้ายปุ่มออกโหมดเต็มจอมาไว้ข้างนอกสุด เพื่อให้อยู่บนสุดตลอด และเพิ่มแอตทริบิวต์กันเบราว์เซอร์ลืมแสดงผล -->
         <button class="fs-close-btn" onclick="toggleJoyFullscreen()" title="ออกจากโหมดเต็มจอ">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -546,8 +544,16 @@
     </div>
 </div>
 
-<script>
-    function toggleFullScreen() {
+<script type="module">
+    // โหลดไลบรารี Web Serial Polyfill เพื่อจำลอง Web Serial ผ่าน WebUSB (สำหรับสาย OTG บนมือถือ)
+    import { serial as usbSerial } from 'https://cdn.jsdelivr.net/npm/web-serial-polyfill@1.0.15/dist/serial.js';
+
+    // ตรวจสอบว่าเป็นมือถือ Android หรือไม่ ถ้าใช่ให้ใช้ WebUSB Polyfill ถ้าเป็น PC ให้ใช้ Web Serial ปกติ
+    const isAndroid = /android/i.test(navigator.userAgent);
+    const serialAPI = isAndroid ? usbSerial : (navigator.serial || usbSerial);
+
+    // ปรับฟังก์ชันให้เป็นระดับ Global (window.) เพื่อให้ปุ่มใน HTML เรียกใช้งานได้
+    window.toggleFullScreen = function() {
         const iconPath = document.getElementById('fs-path');
         const expandPath = "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3";
         const shrinkPath = "M4 14h6m0 0v6m0-6l-7 7m13-7h6m-6 0v6m0-6l7 7M20 10h-6m0 0V4m0 6l7-7M10 4v6m0 0H4m6 0L3 3";
@@ -562,7 +568,7 @@
             else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             iconPath.setAttribute('d', expandPath);
         }
-    }
+    };
 
     document.addEventListener('fullscreenchange', syncFsIcon);
     document.addEventListener('webkitfullscreenchange', syncFsIcon);
@@ -579,14 +585,22 @@
     }
 
     let isJoyFullscreen = false;
-    function toggleJoyFullscreen() {
+    window.toggleJoyFullscreen = function() {
         isJoyFullscreen = !isJoyFullscreen;
         document.body.classList.toggle('fs-joy-mode', isJoyFullscreen);
         destroyJoystick();
         setTimeout(initJoystick, 200); 
-    }
+    };
 
-    async function requestBT() { if (port) return; try { await navigator.serial.requestPort(); } catch (e) {} }
+    // ใช้ serialAPI แทน navigator.serial แบบเดิม
+    window.requestBT = async function() { 
+        if (port) return; 
+        try { 
+            await serialAPI.requestPort(); 
+        } catch (e) {
+            console.error("Connection canceled or failed:", e);
+        } 
+    };
 
     const savedInputs = ['pid_speed', 'pid_count', 'pid_kp', 'pid_kd', 'pid_sensor', 'srv_num', 'srv_angle_range', 'srv_angle_num', 'joy_speed_range', 'joy_speed_num', 'angle_target'];
     function save() { savedInputs.forEach(id => { const el = document.getElementById(id); if(el) localStorage.setItem('rp2350_' + id, el.value); }); }
@@ -611,7 +625,7 @@
     }
     bind('srv_angle_range', 'srv_angle_num'); bind('joy_speed_range', 'joy_speed_num');
 
-    function switchPanel(panelId, btn) {
+    window.switchPanel = function(panelId, btn) {
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         document.getElementById(panelId).classList.add('active');
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -621,9 +635,9 @@
             setTimeout(initJoystick, 150);
         } else { 
             destroyJoystick(); 
-            if(isJoyFullscreen) toggleJoyFullscreen(); 
+            if(isJoyFullscreen) window.toggleJoyFullscreen(); 
         }
-    }
+    };
 
     let port = null;
     function setStatus(conn) {
@@ -639,7 +653,7 @@
             dot.style.background = 'var(--accent-green)';
             dot.style.boxShadow = '0 0 10px var(--accent-green)';
             text.style.color = 'var(--accent-green)'; text.innerText = 'Connected';
-            btn.classList.remove('ready'); btn.style.display = 'none';
+            if(btn) { btn.classList.remove('ready'); btn.style.display = 'none'; }
         } else {
             document.body.classList.remove('is-connected');
             container.style.background = 'rgba(255, 255, 255, 0.03)';
@@ -647,34 +661,47 @@
             dot.style.background = 'var(--text-sec)';
             dot.style.boxShadow = 'none';
             text.style.color = 'var(--text-sec)'; text.innerText = 'Offline';
-            btn.classList.add('ready'); btn.style.display = 'flex'; 
+            if(btn) { btn.classList.add('ready'); btn.style.display = 'flex'; }
         }
     }
 
+    // ฟังก์ชัน autoConnect ใช้ serialAPI แทนตัวหลัก
     async function autoConnect() {
         if (port) return;
         try {
-            const ports = await navigator.serial.getPorts();
+            const ports = await serialAPI.getPorts();
             if (ports.length === 0) return;
-            const sp = ports[0]; await sp.open({ baudRate: 9600 }); port = sp;
+            const sp = ports[0]; 
+            await sp.open({ baudRate: 9600 }); 
+            port = sp;
             setStatus(true);
             while (port.readable) {
                 const reader = port.readable.getReader();
-                try { while (true) { const { done } = await reader.read(); if (done) break; } }
-                catch (e) { break; } finally { reader.releaseLock(); }
+                try { 
+                    while (true) { 
+                        const { done } = await reader.read(); 
+                        if (done) break; 
+                    } 
+                } catch (e) { 
+                    break; 
+                } finally { 
+                    reader.releaseLock(); 
+                }
             }
-        } catch (e) {} finally { if (port) { try { await port.close(); } catch(e) {} port = null; setStatus(false); } }
+        } catch (e) {} finally { 
+            if (port) { try { await port.close(); } catch(e) {} port = null; setStatus(false); } 
+        }
     }
     setInterval(autoConnect, 2000);
 
-    async function sendCmd(cmd) {
+    window.sendCmd = async function(cmd) {
         if (!port || !port.writable) return;
         const writer = port.writable.getWriter();
         try { await writer.write(new TextEncoder().encode(cmd + "\r\n")); } catch (e) {} finally { writer.releaseLock(); }
-    }
+    };
 
-    function sendPIDPass() { sendCmd(`CMD,PIDP,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value},${document.getElementById('pid_count').value},${document.getElementById('pid_sensor').value}`); }
-    function sendServo() { sendCmd(`CMD,SRV,${document.getElementById('srv_num').value},${document.getElementById('srv_angle_num').value}`); }
+    window.sendPIDPass = function() { window.sendCmd(`CMD,PIDP,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value},${document.getElementById('pid_count').value},${document.getElementById('pid_sensor').value}`); };
+    window.sendServo = function() { window.sendCmd(`CMD,SRV,${document.getElementById('srv_num').value},${document.getElementById('srv_angle_num').value}`); };
 
     function setupHold(id, getC, stopC) {
         const btn = document.getElementById(id); let int = null, hold = false;
@@ -683,8 +710,8 @@
             if (hold) return; 
             hold = true; 
             btn.classList.add('btn-holding'); 
-            sendCmd(getC()); 
-            int = setInterval(() => sendCmd(getC()), 150); 
+            window.sendCmd(getC()); 
+            int = setInterval(() => window.sendCmd(getC()), 150); 
         };
         const sp = (e) => { 
             if (e && e.cancelable) e.preventDefault(); 
@@ -692,11 +719,12 @@
             hold = false; 
             btn.classList.remove('btn-holding'); 
             clearInterval(int); 
-            sendCmd(stopC); 
+            window.sendCmd(stopC); 
         };
         ['mousedown', 'touchstart'].forEach(e => btn.addEventListener(e, st, {passive: false}));
         ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(e => btn.addEventListener(e, sp, {passive: false}));
     }
+    
     setupHold('pidHoldBtn', () => `CMD,PIDH,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value}`, 'CMD,STOP');
     setupHold('angleWalkBtn', () => `CMD,ANGW,${document.getElementById('angle_target').value}`, 'CMD,STOP');
 
@@ -707,11 +735,10 @@
         if(joy) return;
         
         let screenW = window.innerWidth;
-        let screenH = window.innerHeight; // เพิ่มการอิงความสูงหน้าจอด้วย
+        let screenH = window.innerHeight;
         let size;
         
         if (isJoyFullscreen) {
-            // ป้องกันขนาดทะลุจอ โดยเอาด้านที่สั้นที่สุดเป็นเกณฑ์
             let minDim = Math.min(screenW, screenH);
             size = minDim > 600 ? 360 : minDim * 0.75; 
         } else {
@@ -721,7 +748,7 @@
         const zone = document.getElementById('zone_joystick');
         zone.style.width = size + 'px';
         zone.style.height = size + 'px';
-        zone.innerHTML = ''; // เคลียร์ DOM เก่าทิ้ง
+        zone.innerHTML = ''; 
 
         joy = nipplejs.create({ 
             zone: zone, 
@@ -732,7 +759,7 @@
         });
         
         joy.on('move', (e, d) => { moving = true; yV = Math.sin(d.angle.radian) * d.distance; xV = Math.cos(d.angle.radian) * d.distance; });
-        joy.on('end', () => { yV = 0; xV = 0; moving = false; sendCmd("CMD,STOP"); });
+        joy.on('end', () => { yV = 0; xV = 0; moving = false; window.sendCmd("CMD,STOP"); });
         
         joyInt = setInterval(() => { 
             if(!moving) return; 
@@ -742,7 +769,7 @@
             let nX = xV / hz; 
             let mL = (nY + nX) * spd; 
             let mR = (nY - nX) * spd; 
-            sendCmd(`CMD,JOY,${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))},${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))}`); 
+            window.sendCmd(`CMD,JOY,${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))},${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))}`); 
         }, 100);
     }
 
