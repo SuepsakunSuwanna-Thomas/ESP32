@@ -543,8 +543,9 @@
 <script type="module">
     import { serial as usbSerial } from 'https://cdn.jsdelivr.net/npm/web-serial-polyfill@1.0.15/dist/serial.js';
 
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const serialAPI = isAndroid ? usbSerial : (navigator.serial || usbSerial);
+    // แยก API ออกจากกันชัดเจน
+    const btAPI = navigator.serial; // ระบบบลูทูธดั้งเดิม (และ USB สำหรับ PC)
+    const usbAPI = usbSerial;       // ระบบสาย USB สำหรับมือถือ (Polyfill)
 
     window.toggleFullScreen = function() {
         const iconPath = document.getElementById('fs-path');
@@ -585,11 +586,26 @@
         setTimeout(initJoystick, 200); 
     };
 
+    // ปรับปรุงฟังก์ชันเชื่อมต่อ ให้ถามตัวเลือกบนมือถือ
     window.requestBT = async function() { 
         if (port) return; 
         try { 
-            await serialAPI.requestPort(); 
-            autoConnect(); // ลองเชื่อมต่อทันทีที่เลือกเสร็จ
+            const isAndroid = /android/i.test(navigator.userAgent);
+            if (isAndroid) {
+                // บนมือถือ ให้มี Popup ถามผู้ใช้
+                const useUSB = confirm("เลือกวิธีการเชื่อมต่อกับบอร์ด:\n\n👉 [ตกลง / OK] = เสียบสาย USB (OTG)\n👉 [ยกเลิก / Cancel] = ผ่านบลูทูธ");
+                if (useUSB) {
+                    await usbAPI.requestPort();
+                } else {
+                    if (!btAPI) throw new Error("ไม่รองรับ Bluetooth บนเบราว์เซอร์นี้");
+                    await btAPI.requestPort();
+                }
+            } else {
+                // บนคอมพิวเตอร์ ระบบจะจัดการหน้าต่างเดียวได้ทั้งสองแบบอยู่แล้ว
+                if (!btAPI) throw new Error("ไม่รองรับ Web Serial บนเบราว์เซอร์นี้");
+                await btAPI.requestPort();
+            }
+            autoConnect(); 
         } catch (e) {
             console.error("Connection canceled or failed:", e);
         } 
@@ -597,12 +613,9 @@
 
     // ================= ระบบความจำสมบูรณ์แบบ (Save/Load All) =================
     function saveAllState() {
-        // 1. กวาดเซฟค่า input และ select ทุกตัวที่มี id
         document.querySelectorAll('input, select').forEach(el => {
             if(el.id) localStorage.setItem('rp_save_' + el.id, el.value);
         });
-        
-        // 2. เซฟเมนูหน้าต่างที่เปิดอยู่
         const activePanel = document.querySelector('.panel.active');
         if(activePanel && activePanel.id) {
             localStorage.setItem('rp_save_panel', activePanel.id);
@@ -610,19 +623,15 @@
     }
 
     function loadAllState() {
-        // 1. โหลดค่า input และ select คืนทุกตัว
         document.querySelectorAll('input, select').forEach(el => {
             if(el.id) {
                 const val = localStorage.getItem('rp_save_' + el.id);
                 if(val !== null) {
                     el.value = val;
-                    // สร้าง event เพื่อให้พวก Slider เลื่อนตามตัวเลข
                     el.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             }
         });
-
-        // 2. โหลดหน้าเมนูเดิมกลับมา
         const savedPanelId = localStorage.getItem('rp_save_panel');
         if(savedPanelId) {
             const btn = document.getElementById('nav_' + savedPanelId);
@@ -630,11 +639,8 @@
         }
     }
 
-    // เริ่มการทำงานระบบจำค่า
     window.addEventListener('DOMContentLoaded', () => { 
         loadAllState(); 
-        
-        // ดักจับการเปลี่ยนแปลงในทุกช่องกรอก เพื่อเซฟอัตโนมัติ
         document.querySelectorAll('input, select').forEach(el => { 
             el.addEventListener('input', saveAllState); 
             el.addEventListener('change', saveAllState); 
@@ -661,7 +667,7 @@
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
-        saveAllState(); // เซฟสถานะเมนู
+        saveAllState(); 
         
         if (panelId === 'joyPanel') {
             setTimeout(initJoystick, 150);
@@ -671,7 +677,7 @@
         }
     };
 
-    // ================= ระบบเชื่อมต่อและ Auto-Reconnect =================
+    // ================= ระบบเชื่อมต่อและ Auto-Reconnect (แบบผสม 2 API) =================
     let port = null;
     let isConnecting = false;
 
@@ -704,10 +710,22 @@
         if (port || isConnecting) return;
         isConnecting = true;
         try {
-            const ports = await serialAPI.getPorts(); // ค้นหาพอร์ตที่เคยได้รับอนุญาตแล้ว
-            if (ports.length === 0) { isConnecting = false; return; }
+            let sp = null;
             
-            const sp = ports[0]; 
+            // เช็คว่าเคยเชื่อมกับพอร์ตไหนไว้บ้าง เริ่มจาก Bluetooth / PC ปกติ
+            if (btAPI) {
+                const btPorts = await btAPI.getPorts();
+                if (btPorts.length > 0) sp = btPorts[0];
+            }
+            
+            // ถ้าไม่เจอในบลูทูธ ให้มาเช็คประวัติพอร์ตสาย USB (มือถือ)
+            if (!sp && usbAPI) {
+                const usbPorts = await usbAPI.getPorts();
+                if (usbPorts.length > 0) sp = usbPorts[0];
+            }
+
+            if (!sp) { isConnecting = false; return; }
+            
             await sp.open({ baudRate: 9600 }); 
             port = sp;
             setStatus(true);
@@ -720,13 +738,13 @@
                         if (done) break; 
                     } 
                 } catch (e) { 
-                    break; // เมื่อสายหลุด หรือบลูทูธตัด Loop การอ่านข้อมูลจะแตกออกที่นี่
+                    break; 
                 } finally { 
                     reader.releaseLock(); 
                 }
             }
         } catch (e) {
-            // ดัก Error เวลาพยายามเชื่อมแต่ตัวอุปกรณ์ยังไม่พร้อม
+            // ไม่ปริ้นท์ error เพื่อไม่ให้กวนคอนโซลเวลามันพยายามวนหาอุปกรณ์
         } finally { 
             isConnecting = false;
             if (port) { 
@@ -737,23 +755,23 @@
         }
     }
     
-    // ตั้งเวลาให้คอยเช็คและพยายามเชื่อมต่อกลับทุกๆ 2 วินาที (Auto-reconnect loop)
     setInterval(autoConnect, 2000);
 
-    // แจ้งเตือนเมื่อมีการเสียบสาย/ต่อบลูทูธกลับเข้ามา (Event listeners)
-    if(serialAPI.addEventListener) {
-        serialAPI.addEventListener("connect", (event) => {
-            console.log("Device plugged in or connected");
-            setTimeout(autoConnect, 500); // ดีเลย์นิดนึงให้อุปกรณ์บูทเสร็จแล้วเชื่อมเลย
-        });
-
-        serialAPI.addEventListener("disconnect", (event) => {
-            console.log("Device unplugged or disconnected");
-            if (port === event.target || port === event.port) {
-                port = null;
-                setStatus(false);
-            }
-        });
+    // ดัก Event การเสียบสายเข้า/ออก ทั้ง 2 API
+    const handleConnect = () => setTimeout(autoConnect, 500);
+    const handleDisconnect = (event) => {
+        if (port === event.target || port === event.port) {
+            port = null; setStatus(false);
+        }
+    };
+    
+    if(btAPI && btAPI.addEventListener) {
+        btAPI.addEventListener("connect", handleConnect);
+        btAPI.addEventListener("disconnect", handleDisconnect);
+    }
+    if(usbAPI && usbAPI.addEventListener) {
+        usbAPI.addEventListener("connect", handleConnect);
+        usbAPI.addEventListener("disconnect", handleDisconnect);
     }
 
     window.sendCmd = async function(cmd) {
@@ -790,7 +808,6 @@
     setupHold('pidHoldBtn', () => `CMD,PIDH,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value}`, 'CMD,STOP');
     setupHold('angleWalkBtn', () => `CMD,ANGW,${document.getElementById('angle_target').value}`, 'CMD,STOP');
 
-    // --- JOYSTICK LOGIC ---
     let joy, joyInt, yV = 0, xV = 0, moving = false;
     
     function initJoystick() {
