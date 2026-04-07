@@ -40,142 +40,85 @@
             --transition-fast: all 0.2s ease;
         }
 
-        /* ================= RESET & GLOBAL ================= */
         ::-webkit-scrollbar { display: none; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
 
         body {
-            /* ใช้ฟอนต์ Inter นำหน้าสำหรับตัวเลข/ภาษาอังกฤษ และ Kanit สำหรับภาษาไทย */
             font-family: 'Inter', 'Kanit', -apple-system, sans-serif;
-            background: var(--bg-deep);
-            background-image: var(--bg-gradient);
-            color: var(--text-main);
+            background: var(--bg-deep); background-image: var(--bg-gradient); color: var(--text-main);
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            display: flex; flex-direction: column;
-            height: 100dvh; overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            overscroll-behavior-y: none;
+            display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+            -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
         }
-
-        /* Background Pattern Effect */
         body::before {
             content: ''; position: fixed; inset: 0;
             background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
             background-size: 24px 24px; z-index: -1; pointer-events: none;
         }
 
-        /* ================= TOP NAVIGATION ================= */
         .topbar {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--bg-surface);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             padding: 16px 24px; border-radius: var(--radius-lg); margin: 16px;
             border: 1px solid var(--border-light); flex-shrink: 0;
-            box-shadow: var(--shadow-float); z-index: 50; gap: 15px;
-            flex-wrap: wrap; 
+            box-shadow: var(--shadow-float); z-index: 50; gap: 15px; flex-wrap: wrap; 
         }
 
         .topbar-main { display: flex; align-items: center; gap: 20px; }
-
         .brand { 
             font-size: 20px; font-weight: 600; letter-spacing: 0.5px; 
             display: flex; align-items: center; gap: 10px; white-space: nowrap;
-            background: linear-gradient(90deg, #fff, #a2a2a7);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background: linear-gradient(90deg, #fff, #a2a2a7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .brand-icon { width: 26px; height: 26px; color: var(--accent-blue); -webkit-text-fill-color: var(--accent-blue); }
-        
-        /* จุดแสดงสถานะขนาดเล็ก ข้างชื่อ Brand (แสดงเฉพาะมือถือ) */
-        #brand-status-indicator {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: var(--accent-green);
-            box-shadow: 0 0 10px var(--accent-green);
-            display: none; margin-left: 4px;
-        }
+        .brand-icon { width: 26px; height: 26px; color: var(--accent-blue); -webkit-text-fill-color: var(--accent-blue); cursor: pointer; pointer-events: auto;}
+        #brand-status-indicator { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); display: none; margin-left: 4px; }
 
         .topbar-actions { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: flex-end; width: 100%; flex: 1;}
         .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end;}
 
         .status-badge {
-            display: flex; align-items: center; gap: 8px;
-            padding: 8px 16px; border-radius: var(--radius-pill);
-            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-light);
-            font-size: 14px; font-weight: 500; white-space: nowrap;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
-            transition: var(--transition-smooth);
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: var(--radius-pill);
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-light); font-size: 14px; font-weight: 500; white-space: nowrap;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); transition: var(--transition-smooth);
         }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-sec); box-shadow: 0 0 10px transparent; transition: var(--transition-smooth);}
 
-        /* ================= BUTTONS ================= */
         button {
             font-family: inherit; font-size: 14px; font-weight: 500; letter-spacing: 0.5px;
             padding: 12px 24px; border-radius: var(--radius-md); border: none; cursor: pointer;
-            transition: var(--transition-fast); color: white; 
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: var(--transition-fast); color: white; display: flex; align-items: center; justify-content: center; gap: 8px;
             white-space: nowrap; flex-shrink: 0; position: relative; overflow: hidden;
             background: rgba(255,255,255,0.05); border: 1px solid var(--border-light);
         }
         button:active { transform: scale(0.94); }
-
-        .btn-primary { 
-            background: linear-gradient(135deg, #0A84FF 0%, #0056b3 100%); 
-            border: 1px solid rgba(10, 132, 255, 0.5);
-            box-shadow: 0 4px 20px var(--accent-blue-glow); 
-        }
+        .btn-primary { background: linear-gradient(135deg, #0A84FF 0%, #0056b3 100%); border: 1px solid rgba(10, 132, 255, 0.5); box-shadow: 0 4px 20px var(--accent-blue-glow); }
         .btn-primary:hover { box-shadow: 0 6px 25px var(--accent-blue-glow); filter: brightness(1.1);}
-        
-        .btn-danger { 
-            background: rgba(255, 69, 58, 0.1); color: var(--accent-red); 
-            border: 1px solid rgba(255, 69, 58, 0.3);
-        }
-        
+        .btn-danger { background: rgba(255, 69, 58, 0.1); color: var(--accent-red); border: 1px solid rgba(255, 69, 58, 0.3); }
         #connectBtn { background: rgba(10, 132, 255, 0.1); color: var(--accent-blue); border-color: rgba(10, 132, 255, 0.3); }
         #connectBtn.ready { background: var(--accent-blue); color: #fff; box-shadow: 0 4px 15px var(--accent-blue-glow); }
+        .btn-icon-only { background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-pill); padding: 10px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; }
+        .btn-holding { background: var(--accent-blue) !important; color: #fff !important; box-shadow: 0 0 25px var(--accent-blue-glow) !important; transform: scale(0.95); }
 
-        .btn-icon-only {
-            background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-pill); padding: 10px;
-            display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;
-        }
-
-        /* Hold Effect Styling */
-        .btn-holding {
-            background: var(--accent-blue) !important; color: #fff !important;
-            box-shadow: 0 0 25px var(--accent-blue-glow) !important; transform: scale(0.95);
-        }
-
-        /* ================= MAIN LAYOUT ================= */
         .main-grid { display: flex; flex: 1; gap: 20px; overflow: hidden; position: relative; padding: 0 16px 20px 16px; }
 
         .sidebar {
-            width: 250px; min-width: 250px;
-            background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg); padding: 16px;
-            display: flex; flex-direction: column; gap: 8px;
+            width: 250px; min-width: 250px; background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 8px;
             border: 1px solid var(--border-light); overflow-y: auto; z-index: 10;
         }
 
         .nav-item {
-            background: transparent; border: 1px solid transparent; text-align: left; 
-            display: flex; align-items: center; gap: 14px; justify-content: flex-start;
-            color: var(--text-sec); padding: 14px 18px; width: 100%; 
-            font-size: 15px; font-weight: 500; border-radius: var(--radius-md);
-            transition: var(--transition-smooth); cursor: pointer;
+            background: transparent; border: 1px solid transparent; text-align: left; display: flex; align-items: center; gap: 14px; justify-content: flex-start;
+            color: var(--text-sec); padding: 14px 18px; width: 100%; font-size: 15px; font-weight: 500; border-radius: var(--radius-md); transition: var(--transition-smooth); cursor: pointer;
         }
         .nav-icon { width: 22px; height: 22px; opacity: 0.7; transition: var(--transition-smooth); }
         .nav-item:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
-        .nav-item.active { 
-            color: #fff; background: rgba(10, 132, 255, 0.15); 
-            border-color: rgba(10, 132, 255, 0.3); box-shadow: inset 0 0 15px rgba(10,132,255,0.1);
-        }
+        .nav-item.active { color: #fff; background: rgba(10, 132, 255, 0.15); border-color: rgba(10, 132, 255, 0.3); box-shadow: inset 0 0 15px rgba(10,132,255,0.1); }
         .nav-item.active .nav-icon { color: var(--accent-blue); opacity: 1; filter: drop-shadow(0 0 8px var(--accent-blue-glow));}
 
-        /* ================= CONTENT PANEL ================= */
         .content-area {
-            flex: 1; position: relative;
-            background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-lg); 
-            padding: 40px 40px 80px 40px; 
-            border: 1px solid var(--border-light); overflow-y: auto; overflow-x: hidden;
+            flex: 1; position: relative; background: var(--bg-surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg); padding: 40px 40px 80px 40px; border: 1px solid var(--border-light); overflow-y: auto; overflow-x: hidden;
             box-shadow: var(--shadow-float); display: flex; flex-direction: column;
         }
 
@@ -183,29 +126,18 @@
         .panel.active { display: block; }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-        .panel-header { 
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 30px;
-        }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 30px; }
         h3 { color: #fff; font-size: 22px; font-weight: 500; display: flex; align-items: center; gap: 12px; }
 
-        /* ================= INPUTS & FORMS ================= */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { margin-bottom: 24px; width: 100%; }
         label { display: block; margin-bottom: 10px; color: var(--text-sec); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
         
         input[type="number"], .custom-select {
-            width: 100%; padding: 14px 20px; background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border-strong); border-radius: var(--radius-md);
-            color: #fff; font-family: inherit; font-size: 16px; font-weight: 500;
-            transition: var(--transition-fast); outline: none;
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+            width: 100%; padding: 14px 20px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+            color: #fff; font-family: inherit; font-size: 16px; font-weight: 500; transition: var(--transition-fast); outline: none; box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
         }
-        input[type="number"]:focus, .custom-select:focus { 
-            border-color: var(--accent-blue); background: rgba(10,132,255,0.05); 
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 0 3px rgba(10,132,255,0.2);
-        }
-
+        input[type="number"]:focus, .custom-select:focus { border-color: var(--accent-blue); background: rgba(10,132,255,0.05); box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 0 3px rgba(10,132,255,0.2); }
         .custom-select {
             -webkit-appearance: none; appearance: none; cursor: pointer;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238E8E93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -213,184 +145,61 @@
         }
         .custom-select option { background-color: #1a1a24; color: #ffffff; font-size: 16px; }
 
-        /* Slider */
-        .slider-group { 
-            display: flex; align-items: center; gap: 15px; 
-            background: rgba(0,0,0,0.2); padding: 12px 15px; 
-            border-radius: var(--radius-md); border: 1px solid var(--border-light); 
-        }
+        .slider-group { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.2); padding: 12px 15px; border-radius: var(--radius-md); border: 1px solid var(--border-light); }
         input[type="range"] { flex: 1; -webkit-appearance: none; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; width: 100%; }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
-            background: #fff; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            border: 2px solid var(--accent-blue);
-        }
-
-        .slider-group input[type="number"] { 
-            width: 75px; text-align: center; font-weight: 600; color: var(--accent-blue); 
-            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-light); 
-            border-radius: 10px; font-size: 16px; padding: 10px 4px; box-shadow: none;
-        }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.5); border: 2px solid var(--accent-blue); }
+        .slider-group input[type="number"] { width: 75px; text-align: center; font-weight: 600; color: var(--accent-blue); background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-light); border-radius: 10px; font-size: 16px; padding: 10px 4px; box-shadow: none; }
 
         .panel-actions { display: flex; gap: 15px; margin-top: 25px; }
         .panel-actions button { flex: 1; padding: 16px; }
 
-        /* ================= JOYSTICK & FULLSCREEN ================= */
         .joy-container-view { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; gap: 30px; }
         .joystick-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 280px; width: 100%; touch-action: none; position: relative;}
-        
-        #zone_joystick { 
-            width: 260px; height: 260px; border-radius: 50%; 
-            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.4) 100%); 
-            border: 2px solid rgba(255,255,255,0.08); position: relative; 
-            box-shadow: inset 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5); 
-            touch-action: none; 
-        }
+        #zone_joystick { width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.4) 100%); border: 2px solid rgba(255,255,255,0.08); position: relative; box-shadow: inset 0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5); touch-action: none; }
 
-        /* ---------------- Fullscreen Mode Styles (Fixed & Bulletproof Layout) ---------------- */
-        body.fs-joy-mode .topbar, 
-        body.fs-joy-mode .sidebar, 
-        body.fs-joy-mode .panel-header, 
-        body.fs-joy-mode .panel:not(#joyPanel) { 
-            display: none !important; 
-        }
+        /* Fullscreen Mode Styles */
+        body.fs-joy-mode .topbar, body.fs-joy-mode .sidebar, body.fs-joy-mode .panel-header, body.fs-joy-mode .panel:not(#joyPanel) { display: none !important; }
+        body.fs-joy-mode #joyPanel { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; max-width: none !important; margin: 0 !important; padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)) 20px !important; background: var(--bg-deep) !important; background-image: var(--bg-gradient) !important; z-index: 9999 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; border-radius: 0 !important; }
+        body.fs-joy-mode .joy-container-view { width: 100% !important; height: 100% !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 40px !important; }
+        body.fs-joy-mode .form-group.fs-keep { width: 100% !important; max-width: 500px !important; margin: 0 auto !important; background: rgba(28,28,32,0.8) !important; padding: 20px !important; border-radius: var(--radius-lg) !important; border: 1px solid var(--border-light) !important; backdrop-filter: blur(10px) !important; }
         
-        /* ดึง #joyPanel ออกมาจัดตำแหน่งใหม่ทั้งหมด ให้เต็มจอ 100% เสมอ */
-        body.fs-joy-mode #joyPanel { 
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)) 20px !important;
-            background: var(--bg-deep) !important;
-            background-image: var(--bg-gradient) !important;
-            z-index: 9999 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            border-radius: 0 !important;
-        }
-
-        body.fs-joy-mode .joy-container-view {
-            width: 100% !important;
-            height: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: center !important;
-            gap: 40px !important;
-        }
-
-        body.fs-joy-mode .form-group.fs-keep { 
-            width: 100% !important; 
-            max-width: 500px !important; 
-            margin: 0 auto !important; 
-            background: rgba(28,28,32,0.8) !important; 
-            padding: 20px !important; 
-            border-radius: var(--radius-lg) !important; 
-            border: 1px solid var(--border-light) !important; 
-            backdrop-filter: blur(10px) !important;
-        }
-
-        /* 🔥 ปุ่มออกโหมดเต็มจอ - แก้ไอคอนจางและขนาดเพี้ยน 🔥 */
-        .fs-close-btn { 
-            position: fixed; 
-            top: 24px; right: 24px;
-            top: max(24px, env(safe-area-inset-top)); 
-            right: max(24px, env(safe-area-inset-right)); 
-            z-index: 100000; /* สูงสุดเสมอ */
-            background: var(--accent-red); color: #ffffff; 
-            border-radius: 50%; width: 56px; height: 56px; 
-            display: none; justify-content: center; align-items: center; 
-            border: 3px solid rgba(255, 255, 255, 0.3); 
-            box-shadow: 0 8px 25px var(--accent-red-glow);
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0; transform: scale(0.5);
-        }
-        
-        /* บังคับไม่ให้ Flexbox ย่อขนาด SVG */
-        .fs-close-btn svg { 
-            width: 28px !important; 
-            height: 28px !important; 
-            flex-shrink: 0 !important;
-            stroke: #ffffff !important;
-        }
-        
+        .fs-close-btn { position: fixed; top: max(24px, env(safe-area-inset-top)); right: max(24px, env(safe-area-inset-right)); z-index: 100000; background: var(--accent-red); color: #ffffff; border-radius: 50%; width: 56px; height: 56px; display: none; justify-content: center; align-items: center; border: 3px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 25px var(--accent-red-glow); cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; transform: scale(0.5); }
+        .fs-close-btn svg { width: 28px !important; height: 28px !important; flex-shrink: 0 !important; stroke: #ffffff !important; }
         body.fs-joy-mode .fs-close-btn { display: flex; opacity: 1; transform: scale(1); animation: popIn 0.5s ease forwards; }
         .fs-close-btn:active { transform: scale(0.85) !important; background: #d9362b; }
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.5) rotate(-45deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
 
-        /* ================= MOBILE LAYOUT (Compact Topbar) ================= */
+        /* Mobile Layout */
         @media (max-width: 800px) {
-            .topbar { 
-                flex-direction: column; align-items: stretch; 
-                padding: max(12px, env(safe-area-inset-top)) 16px 12px; 
-                border-radius: 0 0 var(--radius-lg) var(--radius-lg); 
-                gap: 12px; margin: 0; border-top: none; border-left: none; border-right: none;
-            }
+            .topbar { flex-direction: column; align-items: stretch; padding: max(12px, env(safe-area-inset-top)) 16px 12px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); gap: 12px; margin: 0; border-top: none; border-left: none; border-right: none; }
             .topbar-main { width: 100%; justify-content: space-between; }
-            
             .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-            .status-badge { 
-                grid-column: span 1; justify-content: center; 
-                background: rgba(0,0,0,0.3); padding: 8px; font-size: 12px; border-radius: var(--radius-md);
-            }
+            .status-badge { grid-column: span 1; justify-content: center; background: rgba(0,0,0,0.3); padding: 8px; font-size: 12px; border-radius: var(--radius-md); }
             #connectBtn { grid-column: span 1; padding: 10px; font-size: 13px; }
             .controls button { padding: 10px 8px; width: 100%; font-size: 13px;}
-            
             body.is-connected #status-container { display: none !important; }
             body.is-connected #brand-status-indicator { display: block !important; }
 
             .main-grid { padding: 0; flex-direction: column; }
-            .content-area { 
-                padding: 24px 20px calc(140px + env(safe-area-inset-bottom)) 20px; 
-                border-radius: 0; border: none; background: transparent; box-shadow: none;
-            }
-            
+            .content-area { padding: 24px 20px calc(140px + env(safe-area-inset-bottom)) 20px; border-radius: 0; border: none; background: transparent; box-shadow: none; }
             .panel-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 25px; }
             .panel-header h3 { font-size: 20px; }
             .panel-header button { align-self: flex-end; margin-top: -45px; }
-            
             .grid-2 { grid-template-columns: 1fr; gap: 0; }
             .form-group { margin-bottom: 20px; }
             .panel-actions { flex-direction: column; gap: 12px; }
             
-            .sidebar { 
-                position: fixed; bottom: 0; left: 0; right: 0; 
-                width: 100%; min-width: unset; height: auto; 
-                flex-direction: row; justify-content: space-between; align-items: center; 
-                border-radius: var(--radius-lg) var(--radius-lg) 0 0; 
-                border: none; border-top: 1px solid var(--border-strong); 
-                padding: 12px 10px max(15px, env(safe-area-inset-bottom)) 10px; 
-                margin: 0; background: rgba(20, 20, 24, 0.95); 
-                box-shadow: 0 -10px 30px rgba(0,0,0,0.8); 
-                z-index: 9000;
-            }
-            .nav-item { 
-                flex-direction: column; gap: 6px; padding: 8px 4px; height: auto; 
-                justify-content: center; align-items: center; text-align: center; font-size: 11px; flex: 1;
-                border-radius: 12px; background: transparent; border: none; box-shadow: none;
-            }
+            .sidebar { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; min-width: unset; height: auto; flex-direction: row; justify-content: space-between; align-items: center; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border: none; border-top: 1px solid var(--border-strong); padding: 12px 10px max(15px, env(safe-area-inset-bottom)) 10px; margin: 0; background: rgba(20, 20, 24, 0.95); box-shadow: 0 -10px 30px rgba(0,0,0,0.8); z-index: 9000; }
+            .nav-item { flex-direction: column; gap: 6px; padding: 8px 4px; height: auto; justify-content: center; align-items: center; text-align: center; font-size: 11px; flex: 1; border-radius: 12px; background: transparent; border: none; box-shadow: none; }
             .nav-icon { width: 24px; height: 24px; margin: 0; }
             .nav-item.active { background: transparent; color: var(--accent-blue); }
-            .nav-item::after {
-                content: ''; display: block; width: 4px; height: 4px; border-radius: 50%;
-                background: transparent; transition: var(--transition-smooth); margin-top: 2px;
-            }
+            .nav-item::after { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: transparent; transition: var(--transition-smooth); margin-top: 2px; }
             .nav-item.active::after { background: var(--accent-blue); box-shadow: 0 0 8px var(--accent-blue); }
         }
 
         @media (max-width: 380px) {
-            .nav-item { font-size: 10px; }
-            .nav-icon { width: 20px; height: 20px; }
-            .slider-group input[type="number"] { width: 55px; font-size: 13px; }
-            button { font-size: 12px; padding: 10px; }
-            .btn-icon-only { width: 36px; height: 36px; }
+            .nav-item { font-size: 10px; } .nav-icon { width: 20px; height: 20px; } .slider-group input[type="number"] { width: 55px; font-size: 13px; } button { font-size: 12px; padding: 10px; } .btn-icon-only { width: 36px; height: 36px; }
         }
-
         .icon-sm { width: 22px; height: 22px; }
     </style>
 </head>
@@ -399,7 +208,7 @@
 <div class="topbar">
     <div class="topbar-main">
         <div class="brand">
-            <svg class="brand-icon" ondblclick="requestBT()" style="cursor: pointer; pointer-events: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <svg class="brand-icon" ondblclick="requestUSB()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" title="เชื่อมต่อสาย USB (กด 2 ครั้ง)"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
             RP2350 Command
             <div id="brand-status-indicator"></div>
         </div>
@@ -448,27 +257,17 @@
     </div>
 
     <div class="content-area">
-        
         <button class="fs-close-btn" onclick="toggleJoyFullscreen()" title="ออกจากโหมดเต็มจอ">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
 
         <div id="calPanel" class="panel active">
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; text-align: center;">
                 <div style="width: 90px; height: 90px; border-radius: 50%; background: rgba(10, 132, 255, 0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 0 40px var(--accent-blue-glow); border: 1px solid rgba(10,132,255,0.3);">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="1.5" style="width: 44px; height: 44px;">
-                        <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle>
-                        <line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line>
-                        <line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="1.5" style="width: 44px; height: 44px;"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line></svg>
                 </div>
                 <h3 style="border: none; margin-bottom: 12px; font-size: 24px; justify-content: center;">ตั้งค่าแสงอัตโนมัติ</h3>
-                <p style="color: var(--text-sec); margin-bottom: 35px; font-size: 15px; line-height: 1.6; max-width: 400px;">
-                    วางเซ็นเซอร์ให้อยู่กึ่งกลางเส้นขาว-ดำ<br>จากนั้นกดเริ่มสแกนเพื่อกวาดหาค่าแสงที่ดีที่สุด
-                </p>
+                <p style="color: var(--text-sec); margin-bottom: 35px; font-size: 15px; line-height: 1.6; max-width: 400px;">วางเซ็นเซอร์ให้อยู่กึ่งกลางเส้นขาว-ดำ<br>จากนั้นกดเริ่มสแกนเพื่อกวาดหาค่าแสงที่ดีที่สุด</p>
                 <button class="btn-primary" style="padding: 16px 40px; font-size: 15px; border-radius: var(--radius-pill); width: 100%; max-width: 320px;" onclick="sendCmd('CMD,CAL')">เริ่มสแกนค่าแสง</button>
             </div>
         </div>
@@ -545,14 +344,9 @@
 </div>
 
 <script type="module">
-    // โหลดไลบรารี Web Serial Polyfill เพื่อจำลอง Web Serial ผ่าน WebUSB (สำหรับสาย OTG บนมือถือ)
+    // โหลดไลบรารี Web Serial Polyfill (สำหรับสาย OTG บนมือถือ)
     import { serial as usbSerial } from 'https://cdn.jsdelivr.net/npm/web-serial-polyfill@1.0.15/dist/serial.js';
 
-    // ตรวจสอบว่าเป็นมือถือ Android หรือไม่ ถ้าใช่ให้ใช้ WebUSB Polyfill ถ้าเป็น PC ให้ใช้ Web Serial ปกติ
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const serialAPI = isAndroid ? usbSerial : (navigator.serial || usbSerial);
-
-    // ปรับฟังก์ชันให้เป็นระดับ Global (window.) เพื่อให้ปุ่มใน HTML เรียกใช้งานได้
     window.toggleFullScreen = function() {
         const iconPath = document.getElementById('fs-path');
         const expandPath = "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3";
@@ -575,13 +369,9 @@
 
     function syncFsIcon() {
         const iconPath = document.getElementById('fs-path');
-        const expandPath = "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3";
         const shrinkPath = "M4 14h6m0 0v6m0-6l-7 7m13-7h6m-6 0v6m0-6l7 7M20 10h-6m0 0V4m0 6l7-7M10 4v6m0 0H4m6 0L3 3";
-        if (document.fullscreenElement || document.webkitFullscreenElement) {
-            iconPath.setAttribute('d', shrinkPath);
-        } else {
-            iconPath.setAttribute('d', expandPath);
-        }
+        const expandPath = "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3";
+        iconPath.setAttribute('d', (document.fullscreenElement || document.webkitFullscreenElement) ? shrinkPath : expandPath);
     }
 
     let isJoyFullscreen = false;
@@ -592,35 +382,66 @@
         setTimeout(initJoystick, 200); 
     };
 
-    // ใช้ serialAPI แทน navigator.serial แบบเดิม
+    // 1. ระบบแยก Bluetooth และ USB
     window.requestBT = async function() { 
         if (port) return; 
         try { 
-            await serialAPI.requestPort(); 
-        } catch (e) {
-            console.error("Connection canceled or failed:", e);
-        } 
+            if (navigator.serial) {
+                await navigator.serial.requestPort(); 
+                window.autoConnect(); // เรียกเชื่อมต่อทันทีหลังอนุญาต
+            } else {
+                alert("เบราว์เซอร์นี้ไม่รองรับ Web Serial API (Bluetooth)");
+            }
+        } catch (e) { console.error("Bluetooth Cancelled:", e); } 
     };
 
+    window.requestUSB = async function() { 
+        if (port) return; 
+        try { 
+            await usbSerial.requestPort(); 
+            window.autoConnect(); // เรียกเชื่อมต่อทันทีหลังอนุญาต
+        } catch (e) { console.error("USB Cancelled:", e); } 
+    };
+
+    // 2. ระบบ Auto-Save จำค่าทุก Input และ หน้าต่างที่เปิดค้างไว้
     const savedInputs = ['pid_speed', 'pid_count', 'pid_kp', 'pid_kd', 'pid_sensor', 'srv_num', 'srv_angle_range', 'srv_angle_num', 'joy_speed_range', 'joy_speed_num', 'angle_target'];
-    function save() { savedInputs.forEach(id => { const el = document.getElementById(id); if(el) localStorage.setItem('rp2350_' + id, el.value); }); }
-    function load() { savedInputs.forEach(id => { const val = localStorage.getItem('rp2350_' + id); const el = document.getElementById(id); if(val !== null && el) { el.value = val; el.dispatchEvent(new Event('input')); } }); }
+    
+    function saveAllState() { 
+        // จำค่า Input
+        savedInputs.forEach(id => { const el = document.getElementById(id); if(el) localStorage.setItem('rp2350_' + id, el.value); }); 
+        // จำหน้าที่เปิดไว้ล่าสุด
+        const activePanel = document.querySelector('.panel.active');
+        if(activePanel) localStorage.setItem('rp2350_activePanel', activePanel.id);
+    }
+
+    function loadAllState() { 
+        // โหลดค่า Input
+        savedInputs.forEach(id => { 
+            const val = localStorage.getItem('rp2350_' + id); 
+            const el = document.getElementById(id); 
+            if(val !== null && el) { el.value = val; el.dispatchEvent(new Event('input')); } 
+        }); 
+        
+        // โหลดหน้าต่างที่เปิดล่าสุด
+        const savedPanelId = localStorage.getItem('rp2350_activePanel');
+        if (savedPanelId) {
+            const btnToClick = document.querySelector(`.nav-item[onclick*="${savedPanelId}"]`);
+            if (btnToClick) window.switchPanel(savedPanelId, btnToClick);
+        }
+    }
 
     window.addEventListener('DOMContentLoaded', () => { 
-        load(); 
-        savedInputs.forEach(id => { const el = document.getElementById(id); if(el) { el.addEventListener('input', save); el.addEventListener('change', save); } }); 
+        loadAllState(); 
+        savedInputs.forEach(id => { 
+            const el = document.getElementById(id); 
+            if(el) { el.addEventListener('input', saveAllState); el.addEventListener('change', saveAllState); } 
+        }); 
     });
 
     function bind(rangeId, numId) {
-        const range = document.getElementById(rangeId);
-        const num = document.getElementById(numId);
+        const range = document.getElementById(rangeId); const num = document.getElementById(numId);
         range.addEventListener('input', () => num.value = range.value);
-        const upd = () => { 
-            let val = parseInt(num.value); 
-            if (isNaN(val)) return; 
-            val = Math.min(parseInt(num.max), Math.max(parseInt(num.min), val)); 
-            num.value = val; range.value = val; save(); 
-        };
+        const upd = () => { let val = parseInt(num.value); if (isNaN(val)) return; val = Math.min(parseInt(num.max), Math.max(parseInt(num.min), val)); num.value = val; range.value = val; saveAllState(); };
         num.addEventListener('input', upd); num.addEventListener('change', upd);
     }
     bind('srv_angle_range', 'srv_angle_num'); bind('joy_speed_range', 'joy_speed_num');
@@ -631,15 +452,15 @@
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
-        if (panelId === 'joyPanel') {
-            setTimeout(initJoystick, 150);
-        } else { 
-            destroyJoystick(); 
-            if(isJoyFullscreen) window.toggleJoyFullscreen(); 
-        }
+        saveAllState(); // บันทึกตอนเปลี่ยนหน้า
+        
+        if (panelId === 'joyPanel') { setTimeout(initJoystick, 150); } 
+        else { destroyJoystick(); if(isJoyFullscreen) window.toggleJoyFullscreen(); }
     };
 
     let port = null;
+    let isConnecting = false;
+
     function setStatus(conn) {
         const container = document.getElementById('status-container');
         const dot = document.getElementById('status-dot');
@@ -648,33 +469,49 @@
         
         if (conn) {
             document.body.classList.add('is-connected');
-            container.style.background = 'rgba(48, 209, 88, 0.1)';
-            container.style.borderColor = 'rgba(48, 209, 88, 0.3)';
-            dot.style.background = 'var(--accent-green)';
-            dot.style.boxShadow = '0 0 10px var(--accent-green)';
+            container.style.background = 'rgba(48, 209, 88, 0.1)'; container.style.borderColor = 'rgba(48, 209, 88, 0.3)';
+            dot.style.background = 'var(--accent-green)'; dot.style.boxShadow = '0 0 10px var(--accent-green)';
             text.style.color = 'var(--accent-green)'; text.innerText = 'Connected';
             if(btn) { btn.classList.remove('ready'); btn.style.display = 'none'; }
         } else {
             document.body.classList.remove('is-connected');
-            container.style.background = 'rgba(255, 255, 255, 0.03)';
-            container.style.borderColor = 'var(--border-light)';
-            dot.style.background = 'var(--text-sec)';
-            dot.style.boxShadow = 'none';
+            container.style.background = 'rgba(255, 255, 255, 0.03)'; container.style.borderColor = 'var(--border-light)';
+            dot.style.background = 'var(--text-sec)'; dot.style.boxShadow = 'none';
             text.style.color = 'var(--text-sec)'; text.innerText = 'Offline';
             if(btn) { btn.classList.add('ready'); btn.style.display = 'flex'; }
         }
     }
 
-    // ฟังก์ชัน autoConnect ใช้ serialAPI แทนตัวหลัก
-    async function autoConnect() {
-        if (port) return;
+    // 3. ระบบ Auto-Reconnect จะทำการกวาดหาทั้งพอร์ต USB และ Bluetooth ที่เคยอนุญาตไว้ แล้วเชื่อมต่อเองถ้าหลุด
+    window.autoConnect = async function() {
+        if (port || isConnecting) return;
+        isConnecting = true;
         try {
-            const ports = await serialAPI.getPorts();
-            if (ports.length === 0) return;
-            const sp = ports[0]; 
-            await sp.open({ baudRate: 9600 }); 
-            port = sp;
+            let targetPort = null;
+            
+            // เช็คช่องทางแรก: Bluetooth หรือ USB จาก Native Web Serial
+            if (navigator.serial) {
+                const nativePorts = await navigator.serial.getPorts();
+                if (nativePorts.length > 0) targetPort = nativePorts[0];
+            }
+            
+            // เช็คช่องทางที่สอง: USB OTG ผ่าน WebUSB Polyfill (กรณีหาช่องแรกไม่เจอ)
+            if (!targetPort) {
+                const usbPorts = await usbSerial.getPorts();
+                if (usbPorts.length > 0) targetPort = usbPorts[0];
+            }
+
+            // ถ้าไม่มีอุปกรณ์ไหนที่พร้อมเชื่อมต่อเลย ให้หยุดการทำงาน
+            if (!targetPort) {
+                isConnecting = false;
+                return;
+            }
+
+            // เจออุปกรณ์แล้ว เริ่มเชื่อมต่อ!
+            await targetPort.open({ baudRate: 9600 }); 
+            port = targetPort;
             setStatus(true);
+            
             while (port.readable) {
                 const reader = port.readable.getReader();
                 try { 
@@ -683,16 +520,21 @@
                         if (done) break; 
                     } 
                 } catch (e) { 
-                    break; 
+                    break; // สายหลุด หรือ สัญญาณตัด Loop จะพังออกมารอการเชื่อมใหม่
                 } finally { 
                     reader.releaseLock(); 
                 }
             }
-        } catch (e) {} finally { 
+        } catch (e) {
+            // Error ตอนเชื่อมต่อ ปล่อยผ่านไปรอรอบหน้า
+        } finally { 
             if (port) { try { await port.close(); } catch(e) {} port = null; setStatus(false); } 
+            isConnecting = false;
         }
-    }
-    setInterval(autoConnect, 2000);
+    };
+    
+    // ตั้งให้เช็คการเชื่อมต่ออัตโนมัติทุกๆ 2 วินาที
+    setInterval(window.autoConnect, 2000);
 
     window.sendCmd = async function(cmd) {
         if (!port || !port.writable) return;
@@ -707,19 +549,11 @@
         const btn = document.getElementById(id); let int = null, hold = false;
         const st = (e) => { 
             if (e && e.cancelable) e.preventDefault(); 
-            if (hold) return; 
-            hold = true; 
-            btn.classList.add('btn-holding'); 
-            window.sendCmd(getC()); 
-            int = setInterval(() => window.sendCmd(getC()), 150); 
+            if (hold) return; hold = true; btn.classList.add('btn-holding'); window.sendCmd(getC()); int = setInterval(() => window.sendCmd(getC()), 150); 
         };
         const sp = (e) => { 
             if (e && e.cancelable) e.preventDefault(); 
-            if (!hold) return; 
-            hold = false; 
-            btn.classList.remove('btn-holding'); 
-            clearInterval(int); 
-            window.sendCmd(stopC); 
+            if (!hold) return; hold = false; btn.classList.remove('btn-holding'); clearInterval(int); window.sendCmd(stopC); 
         };
         ['mousedown', 'touchstart'].forEach(e => btn.addEventListener(e, st, {passive: false}));
         ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(e => btn.addEventListener(e, sp, {passive: false}));
@@ -733,58 +567,29 @@
     
     function initJoystick() {
         if(joy) return;
-        
-        let screenW = window.innerWidth;
-        let screenH = window.innerHeight;
-        let size;
-        
-        if (isJoyFullscreen) {
-            let minDim = Math.min(screenW, screenH);
-            size = minDim > 600 ? 360 : minDim * 0.75; 
-        } else {
-            size = screenW > 500 ? 240 : 200;
-        }
+        let screenW = window.innerWidth; let screenH = window.innerHeight; let size;
+        if (isJoyFullscreen) { let minDim = Math.min(screenW, screenH); size = minDim > 600 ? 360 : minDim * 0.75; } 
+        else { size = screenW > 500 ? 240 : 200; }
 
         const zone = document.getElementById('zone_joystick');
-        zone.style.width = size + 'px';
-        zone.style.height = size + 'px';
-        zone.innerHTML = ''; 
+        zone.style.width = size + 'px'; zone.style.height = size + 'px'; zone.innerHTML = ''; 
 
-        joy = nipplejs.create({ 
-            zone: zone, 
-            mode: 'static', 
-            position: { left: '50%', top: '50%' }, 
-            color: '#0A84FF', 
-            size: size 
-        });
+        joy = nipplejs.create({ zone: zone, mode: 'static', position: { left: '50%', top: '50%' }, color: '#0A84FF', size: size });
         
         joy.on('move', (e, d) => { moving = true; yV = Math.sin(d.angle.radian) * d.distance; xV = Math.cos(d.angle.radian) * d.distance; });
         joy.on('end', () => { yV = 0; xV = 0; moving = false; window.sendCmd("CMD,STOP"); });
         
         joyInt = setInterval(() => { 
             if(!moving) return; 
-            let spd = parseInt(document.getElementById('joy_speed_num').value); 
-            let hz = size / 2; 
-            let nY = yV / hz; 
-            let nX = xV / hz; 
-            let mL = (nY + nX) * spd; 
-            let mR = (nY - nX) * spd; 
+            let spd = parseInt(document.getElementById('joy_speed_num').value); let hz = size / 2; 
+            let nY = yV / hz; let nX = xV / hz; let mL = (nY + nX) * spd; let mR = (nY - nX) * spd; 
             window.sendCmd(`CMD,JOY,${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))},${Math.round(Math.max(-spd, Math.min(spd, mL)))},${Math.round(Math.max(-spd, Math.min(spd, mR)))}`); 
         }, 100);
     }
 
-    function destroyJoystick() { 
-        if(joy) { joy.destroy(); joy = null; } 
-        clearInterval(joyInt); 
-        document.getElementById('zone_joystick').innerHTML = ''; 
-    }
+    function destroyJoystick() { if(joy) { joy.destroy(); joy = null; } clearInterval(joyInt); document.getElementById('zone_joystick').innerHTML = ''; }
     
-    window.addEventListener('resize', () => {
-        if (document.getElementById('joyPanel').classList.contains('active')) {
-            destroyJoystick();
-            setTimeout(initJoystick, 200);
-        }
-    });
+    window.addEventListener('resize', () => { if (document.getElementById('joyPanel').classList.contains('active')) { destroyJoystick(); setTimeout(initJoystick, 200); } });
 </script>
 </body>
 </html>
