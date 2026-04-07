@@ -345,9 +345,9 @@
 
 <div id="connModal" class="modal-overlay">
     <div class="modal-box">
-        <h3>เชื่อมต่ออุปกรณ์</h3>
-        <p>เลือกวิธีเชื่อมต่อระหว่างอุปกรณ์กับบอร์ด RP2350</p>
-        <button class="btn-primary" onclick="connectUSB()">🔌 สาย USB (เสียบ OTG)</button>
+        <h3>เลือกรูปแบบการเชื่อมต่อ</h3>
+        <p>กรุณาระบุช่องทางที่ใช้เชื่อมต่อกับอุปกรณ์</p>
+        <button class="btn-primary" onclick="connectUSB()">🔌 สาย USB (OTG)</button>
         <button class="btn-primary" style="background: rgba(255,255,255,0.1); border-color: var(--border-strong);" onclick="connectBT()">📶 บลูทูธ (Bluetooth)</button>
         <button class="btn-danger" style="margin-top: 10px; background: transparent; border: none; color: var(--text-sec);" onclick="closeModal()">ยกเลิก</button>
     </div>
@@ -545,39 +545,43 @@
         setTimeout(initJoystick, 200); 
     };
 
-    // --- ระบบเรียก Modal ---
+    let isSelectingPort = false;
+
     window.openConnModal = function() {
         if (port) return;
+        isSelectingPort = true;
         const isAndroid = /android/i.test(navigator.userAgent);
         if (isAndroid) {
             document.getElementById('connModal').classList.add('show');
         } else {
-            window.connectBT(); // PC ข้ามหน้าถามไปใช้ Bluetooth/Serial ปกติเลย
+            window.connectBT(); 
         }
     };
 
     window.closeModal = function() {
         document.getElementById('connModal').classList.remove('show');
+        isSelectingPort = false;
     };
 
     window.connectUSB = async function() {
-        window.closeModal();
+        document.getElementById('connModal').classList.remove('show');
         try {
-            await usbAPI.requestPort();
-            autoConnect();
-        } catch(e) { console.error(e); }
+            const sp = await usbAPI.requestPort();
+            await openPort(sp);
+        } catch(e) { }
+        isSelectingPort = false;
     };
 
     window.connectBT = async function() {
-        window.closeModal();
+        document.getElementById('connModal').classList.remove('show');
         try {
-            if (!btAPI) throw new Error("ไม่รองรับ Web Serial บนเบราว์เซอร์นี้");
-            await btAPI.requestPort();
-            autoConnect();
-        } catch(e) { console.error(e); }
+            if (!btAPI) throw new Error("Not supported");
+            const sp = await btAPI.requestPort();
+            await openPort(sp);
+        } catch(e) { }
+        isSelectingPort = false;
     };
 
-    // --- ระบบความจำ (Save/Load) ---
     function saveAllState() {
         document.querySelectorAll('input, select').forEach(el => {
             if(el.id) localStorage.setItem('rp_save_' + el.id, el.value);
@@ -643,9 +647,10 @@
         }
     };
 
-    // --- Auto-Reconnect & Serial Handling ---
     let port = null;
     let isConnecting = false;
+    let keepReading = false;
+    let reader = null;
 
     function setStatus(conn) {
         const container = document.getElementById('status-container');
@@ -672,8 +677,54 @@
         }
     }
 
+    async function closePort() {
+        keepReading = false;
+        if (reader) {
+            try { await reader.cancel(); } catch (e) {}
+            reader = null;
+        }
+        if (port) {
+            try { await port.close(); } catch (e) {}
+            port = null;
+        }
+        setStatus(false);
+    }
+
+    async function openPort(selectedPort) {
+        if (port) await closePort();
+        try {
+            await selectedPort.open({ baudRate: 9600 });
+            port = selectedPort;
+            setStatus(true);
+            keepReading = true;
+            readLoop();
+        } catch (e) {
+            await closePort();
+        }
+    }
+
+    async function readLoop() {
+        while (port && port.readable && keepReading) {
+            reader = port.readable.getReader();
+            try {
+                while (true) {
+                    const { done } = await reader.read();
+                    if (done) break;
+                }
+            } catch (e) {
+                break; 
+            } finally {
+                if (reader) {
+                    try { reader.releaseLock(); } catch(e) {}
+                    reader = null;
+                }
+            }
+        }
+        await closePort();
+    }
+
     async function autoConnect() {
-        if (port || isConnecting) return;
+        if (port || isConnecting || isSelectingPort) return;
         isConnecting = true;
         try {
             let sp = null;
@@ -685,43 +736,21 @@
                 const usbPorts = await usbAPI.getPorts();
                 if (usbPorts.length > 0) sp = usbPorts[0];
             }
-
-            if (!sp) { isConnecting = false; return; }
-            
-            await sp.open({ baudRate: 9600 }); 
-            port = sp;
-            setStatus(true);
-            
-            while (port.readable) {
-                const reader = port.readable.getReader();
-                try { 
-                    while (true) { 
-                        const { done } = await reader.read(); 
-                        if (done) break; 
-                    } 
-                } catch (e) { 
-                    break; 
-                } finally { 
-                    reader.releaseLock(); 
-                }
+            if (sp) {
+                await openPort(sp);
             }
         } catch (e) {
         } finally { 
             isConnecting = false;
-            if (port) { 
-                try { await port.close(); } catch(e) {} 
-                port = null; 
-                setStatus(false); 
-            } 
         }
     }
     
     setInterval(autoConnect, 2000);
 
     const handleConnect = () => setTimeout(autoConnect, 500);
-    const handleDisconnect = (event) => {
+    const handleDisconnect = async (event) => {
         if (port === event.target || port === event.port) {
-            port = null; setStatus(false);
+            await closePort();
         }
     };
     
@@ -734,11 +763,16 @@
         usbAPI.addEventListener("disconnect", handleDisconnect);
     }
 
-    // --- คำสั่งเชื่อมต่อปุ่มกดต่างๆ ---
     window.sendCmd = async function(cmd) {
         if (!port || !port.writable) return;
         const writer = port.writable.getWriter();
-        try { await writer.write(new TextEncoder().encode(cmd + "\r\n")); } catch (e) {} finally { writer.releaseLock(); }
+        try { 
+            await writer.write(new TextEncoder().encode(cmd + "\r\n")); 
+        } catch (e) { 
+            await closePort();
+        } finally { 
+            try { writer.releaseLock(); } catch(e) {} 
+        }
     };
 
     window.sendPIDPass = function() { window.sendCmd(`CMD,PIDP,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value},${document.getElementById('pid_count').value},${document.getElementById('pid_sensor').value}`); };
@@ -769,7 +803,6 @@
     setupHold('pidHoldBtn', () => `CMD,PIDH,${document.getElementById('pid_speed').value},${document.getElementById('pid_kp').value},${document.getElementById('pid_kd').value}`, 'CMD,STOP');
     setupHold('angleWalkBtn', () => `CMD,ANGW,${document.getElementById('angle_target').value}`, 'CMD,STOP');
 
-    // --- JOYSTICK ---
     let joy, joyInt, yV = 0, xV = 0, moving = false;
     
     function initJoystick() {
